@@ -5,25 +5,23 @@ import { useDispatch, useSelector } from "react-redux";
 import { current } from "../../../redux/actions/Actions";
 import MiddleComponent from "./MiddleComponent";
 import { get_all_checkpoint, get_all_quiz, get_learning_schedule } from "../../../redux/actions/StudentAction";
+import Footer from "../../../Components/Footer/Footer";
 
 const DashboardStudent = () => {
   const dispatch = useDispatch();
   const { user, userLoading } = useSelector((state) => state.LoginReducer);
-  const { learningSchedule, studentQuizScore, studentCheckpointScore } = useSelector((state) => state.StudentReducer);
-  const [courseId, setCourseId] = useState({});
+  const { learningSchedule, studentQuizScore, studentCheckpointScore, night_mode } = useSelector((state) => state.StudentReducer);
 
   useEffect(() => { dispatch(current()); }, []);
-  useEffect(() => { if (user.course) setCourseId([user.course[0].courseId[0], user.course[0].courseId[1]]); }, [user.course]);
   useEffect(() => { if (!userLoading) dispatch(get_learning_schedule(user)); }, [userLoading]);
   useEffect(() => { dispatch(get_all_quiz(user)); dispatch(get_all_checkpoint(user)); }, [user]);
 
   const ResumeCourse = () => {
     if (!learningSchedule) return null;
-    const courses = learningSchedule.learning;
     let lastOpenSkill = null, superSkillsId = null;
-    for (let i = courses.length - 1; i >= 0; i--) {
-      for (let j = courses[i].details.length - 1; j >= 0; j--) {
-        if (courses[i].details[j].open === true) { lastOpenSkill = courses[i].details[j]; superSkillsId = courses[i]._id; break; }
+    for (let i = learningSchedule.learning.length - 1; i >= 0; i--) {
+      for (let j = learningSchedule.learning[i].details.length - 1; j >= 0; j--) {
+        if (learningSchedule.learning[i].details[j].open) { lastOpenSkill = learningSchedule.learning[i].details[j]; superSkillsId = learningSchedule.learning[i]._id; break; }
       }
       if (lastOpenSkill) break;
     }
@@ -36,27 +34,22 @@ const DashboardStudent = () => {
     studentCheckpointScore?.forEach((s) => (c += +s.checkpointScore));
     return q + c;
   };
-
-  const calcProgress = () => {
-    if (!user.course) return 0;
-    return Math.round(user.course[0]?.learnProgress || 0);
-  };
-
+  const calcProgress = () => Math.round(user.course?.[0]?.learnProgress || 0);
   const resumeLink = ResumeCourse();
+  const dm = night_mode;
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className={`min-h-screen flex flex-col ${dm ? "bg-gray-900" : "bg-slate-50"}`}>
       <HeaderS />
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
-        {/* Welcome */}
+      <div className="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 py-8">
         <div className="mb-8">
-          <h1 className="text-2xl font-bold text-slate-900">My Dashboard</h1>
-          <p className="text-slate-500 text-sm mt-1">Welcome back, {user.firstName}! Keep up the great work.</p>
+          <h1 className={`text-2xl font-bold ${dm ? "text-white" : "text-slate-900"}`}>My Dashboard</h1>
+          <p className={`text-sm mt-1 ${dm ? "text-gray-400" : "text-slate-500"}`}>Welcome back, {user.firstName}! Keep up the great work.</p>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-          {/* Progress Card */}
-          <div className="lg:col-span-2 bg-gradient-to-br from-indigo-600 to-violet-600 rounded-2xl p-7 text-white shadow-lg shadow-indigo-200">
+          {/* Progress card */}
+          <div className="lg:col-span-2 bg-gradient-to-br from-indigo-600 to-violet-600 rounded-2xl p-7 text-white shadow-lg shadow-indigo-200/40">
             <div className="flex items-start justify-between mb-6">
               <div>
                 <p className="text-indigo-200 text-sm font-medium">Course Progress</p>
@@ -78,31 +71,29 @@ const DashboardStudent = () => {
             )}
           </div>
 
-          {/* My Courses panel */}
-          <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-5">
-            <h2 className="font-bold text-slate-900 mb-4 flex items-center justify-between">
+          {/* Courses panel */}
+          <div className={`rounded-2xl p-5 ${dm ? "bg-gray-800 border border-gray-700" : "bg-white border border-slate-100 shadow-sm"}`}>
+            <h2 className={`font-bold mb-4 flex items-center justify-between ${dm ? "text-white" : "text-slate-900"}`}>
               My Courses
-              <Link to="/courses" className="text-xs text-indigo-600 font-semibold hover:underline">View all</Link>
+              <Link to="/courses" className="text-xs text-indigo-400 font-semibold hover:underline">View all</Link>
             </h2>
             {userLoading ? (
-              <div className="space-y-3">
-                {[1,2].map((i) => <div key={i} className="h-16 bg-slate-100 rounded-xl animate-pulse"></div>)}
-              </div>
-            ) : user.course?.map((course, i) => (
-              <div key={i} className="flex gap-3 mb-3 last:mb-0">
-                {course.course?.image && <img src={course.course.image} alt="" className="w-12 h-12 rounded-xl object-cover flex-shrink-0" />}
+              <div className="space-y-3">{[1,2].map((i) => <div key={i} className={`h-16 rounded-xl animate-pulse ${dm ? "bg-gray-700" : "bg-slate-100"}`}></div>)}</div>
+            ) : user.course?.map((enrollment, i) => (
+              <div key={i} className={`flex gap-3 mb-3 last:mb-0 p-3 rounded-xl ${dm ? "bg-gray-700" : "bg-slate-50"}`}>
+                {enrollment.course?.image && <img src={enrollment.course.image} alt="" className="w-12 h-12 rounded-xl object-cover flex-shrink-0" />}
                 <div className="flex-1 min-w-0">
-                  <p className="font-semibold text-slate-900 text-sm truncate">{course.course?.title}</p>
-                  <p className="text-xs text-slate-400 mt-0.5 line-clamp-1">{course.course?.description}</p>
+                  <p className={`font-semibold text-sm truncate ${dm ? "text-white" : "text-slate-900"}`}>{enrollment.course?.title}</p>
+                  <p className={`text-xs mt-0.5 line-clamp-1 ${dm ? "text-gray-400" : "text-slate-400"}`}>{enrollment.course?.description}</p>
                 </div>
               </div>
             ))}
           </div>
         </div>
 
-        {/* Middle Component (students progress for instructor view, meetings, etc) */}
         <MiddleComponent user={user} userLoading={userLoading} />
       </div>
+      <Footer />
     </div>
   );
 };

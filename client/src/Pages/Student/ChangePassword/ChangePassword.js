@@ -10,6 +10,7 @@ import Footer from "../../../Components/Footer/Footer";
 
 const ChangePassword = () => {
   const { user } = useSelector((state) => state.LoginReducer);
+  const { night_mode } = useSelector((state) => state.StudentReducer);
   const [loading, setLoading] = useState(false);
   const [form, setForm] = useState({ currentPassword: "", newPassword: "", confirmPassword: "" });
   const [showPw, setShowPw] = useState({ current: false, new: false, confirm: false });
@@ -33,7 +34,7 @@ const ChangePassword = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className={`min-h-screen flex flex-col ${night_mode ? "bg-gray-900" : "bg-slate-50"}`}>
       <HeaderS />
       <div className="max-w-lg mx-auto px-4 sm:px-6 py-8">
         <div className="mb-8">

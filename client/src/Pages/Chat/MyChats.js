@@ -86,6 +86,7 @@ const MyChats = ({ fetchAgain }) => {
   const closeModal = () => {
     setModalConfig({ show: false, display: "none" });
   };
+
   return (
     <div className="w-72 flex-shrink-0 bg-white rounded-2xl shadow-sm border border-slate-100 flex flex-col overflow-hidden">
       {/* Header */}

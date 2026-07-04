@@ -1,7 +1,3 @@
-import "./App.css";
-import "./style.css";
-import "./Components/style.css";
-import "./Assets/responsive.css";
 import Login from "./Pages/Login/Login";
 import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 import { PrivateRoute } from "./utils/ProtectedRoute";
@@ -129,7 +125,7 @@ function App() {
           path="/chat"
           element={
             <PrivateRoute user="1">
-              {/* <HeaderI /> */}
+              <HeaderI />
               <Chat />
             </PrivateRoute>
           }
@@ -138,7 +134,7 @@ function App() {
           path="/learn-chat"
           element={
             <PrivateRoute user="2">
-              {/* <HeaderS /> */}
+              <HeaderS />
               <Chat />
             </PrivateRoute>
           }

@@ -8,10 +8,11 @@ import Footer from "../../../Components/Footer/Footer";
 const Mycourse = () => {
   const dispatch = useDispatch();
   const { user, userLoading } = useSelector((state) => state.LoginReducer);
+  const { night_mode } = useSelector((state) => state.StudentReducer);
   useEffect(() => { dispatch(current()); }, []);
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className={`min-h-screen flex flex-col ${night_mode ? "bg-gray-900" : "bg-slate-50"}`}>
       <HeaderS />
       <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8">
         <div className="mb-8">

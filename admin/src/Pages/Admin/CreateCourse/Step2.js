@@ -14,6 +14,8 @@ const Step2 = ({
   showQuiz, displayQuiz, ModalQuizOpen, closeModalQuiz,
 }) => {
   const [chapterShow, setChapterShow] = useState(false);
+  const [quizModal, setQuizModal] = useState({ show: false, indexes: null });
+  const [courseRef, setCourseRef] = useState(null);
   const [openSections, setOpenSections] = useState({});
 
   const toggleSection = (id) => setOpenSections((prev) => ({ ...prev, [id]: !prev[id] }));
@@ -23,7 +25,7 @@ const Step2 = ({
       <Modal_AddChapter show={chapterShow} display={chapterShow ? "block" : "none"} closeModal={() => setChapterShow(false)} getChapterName={getChapterName} saveChapterName={() => { saveChapterName(); setChapterShow(false); }} />
       <Modal_AddSkills show={skillsShow} display={skillsDisplay} close={ModalSkillsClose} getSkillsName={getSkillsName} saveSkillsName={saveSkillsName} />
       <Modal_AddSkillsContent show={skillsContentShow} display={skillsContentDisplay} ModalSkillsContentOpen={ModalSkillsContentOpen} ModalSkillsContentClose={ModalSkillsContentClose} handleUpdate={handleUpdate} saveSkillsContent={saveSkillsContent} />
-      <Modal_AddQuiz show={showQuiz} display={displayQuiz} closeModalQuiz={closeModalQuiz} />
+      <Modal_AddQuiz quizModal={quizModal} setQuizModal={setQuizModal} quizIndexes={quizModal.indexes} setCourse={setCourseRef} />
 
       <div>
         <div className="flex items-center justify-between mb-5">
@@ -67,7 +69,7 @@ const Step2 = ({
                           className="flex items-center gap-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-600 font-semibold px-2.5 py-1.5 rounded-lg text-xs transition-all">
                           <i className="fas fa-plus text-xs"></i> Slide
                         </button>
-                        <button onClick={() => ModalQuizOpen(si, ski, courseCreated._id)}
+                        <button onClick={() => setQuizModal({ show: true, indexes: { si, ski, courseId: courseCreated?._id } })}
                           className="flex items-center gap-1 bg-violet-50 hover:bg-violet-100 text-violet-600 font-semibold px-2.5 py-1.5 rounded-lg text-xs transition-all">
                           <i className="fas fa-question-circle text-xs"></i> Quiz
                         </button>

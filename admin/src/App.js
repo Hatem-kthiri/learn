@@ -1,8 +1,3 @@
-import "./App.css";
-import "./style.css";
-import "./Components/style.css";
-import "./responsive.css";
-
 import "react-draft-wysiwyg/dist/react-draft-wysiwyg.css";
 import { Routes, Route } from "react-router-dom";
 import EditCourse from "./Pages/Admin/EditCourse/EditCourse";

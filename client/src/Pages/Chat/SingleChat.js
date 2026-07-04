@@ -7,7 +7,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { add_notification } from "../../redux/actions/ChatsActions";
 import axios from "axios";
 import UpdateGroupChatModal from "./UpdateGroupChatModal";
-// import { modal_config } from "../../redux/actions/ChatsActions";
+import { modal_config } from "../../redux/actions/ChatsActions";
 
 let socket, selectedChatCompare;
 

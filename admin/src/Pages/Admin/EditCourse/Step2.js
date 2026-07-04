@@ -120,7 +120,7 @@ const Step2 = ({ course, setCourse }) => {
       )}
 
       {/* Quiz modal */}
-      <Modal_AddQuiz show={quizModal.show} display={quizModal.show ? "block" : "none"} closeModalQuiz={() => setQuizModal({ show: false, indexes: null })} />
+      <Modal_AddQuiz quizModal={quizModal} setQuizModal={setQuizModal} quizIndexes={quizModal.indexes} setCourse={setCourse} />
 
       {/* Rename section modal */}
       {editSection.show && (

@@ -26,6 +26,7 @@ const Quiz = ({ skillsData, handleNext, setNextButton }) => {
   useEffect(() => {
     setWait(true);
     setQuizAlreadySubmitted(undefined);
+    setNextButton(false);
     axios.get(`${url}/api/user/get-quiz/${user._id}/${skillsId}`)
       .then((r) => { setQuizAlreadySubmitted(r.data.data); setNextButton(true); })
       // A 404 here just means "not submitted yet" - the normal first-view case,

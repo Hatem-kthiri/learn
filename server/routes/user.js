@@ -151,6 +151,7 @@ router.get("/loggedUser", isAuth, async (req, res) => {
 // Create a new checkpoint
 router.post("/add-checkpoint", validate(v.addCheckpoint), async (req, res) => {
   try {
+    console.log("test");
     const { checkpointName, checkpointId, student, guild, link } = req.body;
 
     const findCheckpoint = await Checkpoint.findOne({
@@ -339,6 +340,7 @@ router.put("/open-skill", validate(v.openSkill), async (req, res) => {
     if (!nextDetail.open) {
       nextDetail.open = true;
       nextDetail.updated = new Date();
+      schedule.markModified("learning");
       await schedule.save();
     }
 
@@ -364,7 +366,6 @@ router.put("/open-skill", validate(v.openSkill), async (req, res) => {
     if (!skill) {
       return res.status(404).json({ error: "Next lesson content not found" });
     }
-    console.log(skill);
     res.status(200).json({
       message: "Skill unlocked",
       nextSuperSkillsId: nextChapterId,

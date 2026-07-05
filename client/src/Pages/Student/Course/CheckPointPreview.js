@@ -26,14 +26,26 @@ const CheckPointPreview = ({ skillsData, skillsPosition, setNextButton, nightMod
     user.course[0].course.data.forEach((el) => {
       el.superSkills?.forEach((skill) => { if (skill._id === skillsId) checkpointName = skill.skillsName; });
     });
-    dispatch(add_checkpoint({ user, id: skillsId, link, name: checkpointName }));
-    setSubmitLoading(false);
+    dispatch(add_checkpoint({
+      checkpointName,
+      checkpointId: skillsId,
+      student: user._id,
+      guild: user.guild,
+      link,
+      user,
+      setSubmitLoading,
+    }));
   };
 
-  const handleUpdate = (id) => {
+  const handleUpdate = (checkpointDocId) => {
     setSubmitLoading(true);
-    dispatch(update_checkpoint({ user, id, link }));
-    setSubmitLoading(false);
+    dispatch(update_checkpoint({
+      id: checkpointDocId,
+      checkpointId: skillsId,
+      link,
+      user,
+      setSubmitLoading,
+    }));
   };
 
   const isClosed = checkpointSubmited && !checkpointSubmited.open;

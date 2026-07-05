@@ -114,7 +114,7 @@ function App() {
           }
         />
         <Route
-          path="/student-profile"
+          path="/profile-student"
           element={
             <PrivateRoute user="2">
               <Profile />
@@ -125,7 +125,6 @@ function App() {
           path="/chat"
           element={
             <PrivateRoute user="1">
-              <HeaderI />
               <Chat />
             </PrivateRoute>
           }
@@ -134,7 +133,6 @@ function App() {
           path="/learn-chat"
           element={
             <PrivateRoute user="2">
-              <HeaderS />
               <Chat />
             </PrivateRoute>
           }
@@ -237,11 +235,11 @@ function App() {
         />
         <Route path="/*" element={<NotFound />} />
       </Routes>
-      {!isLoginPage &&
+      {/* {!isLoginPage &&
         !isRecoveryPassword &&
         !isChat &&
         !isLearnChat &&
-        !isCourse && <Footer />}
+        !isCourse && <Footer />} */}
     </div>
   );
 }

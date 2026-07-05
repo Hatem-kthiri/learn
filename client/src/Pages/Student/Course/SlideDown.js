@@ -1,7 +1,14 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
-function SlideDown({ title, children, courseIndex, nightMode }) {
-  const [open, setOpen] = useState(courseIndex === 0);
+function SlideDown({ title, children, isCurrentChapter, nightMode }) {
+  const [open, setOpen] = useState(isCurrentChapter);
+
+  // If navigation moves into this chapter later (e.g. clicking "Next" past
+  // a chapter boundary), auto-expand it rather than only checking on mount.
+  useEffect(() => {
+    if (isCurrentChapter) setOpen(true);
+  }, [isCurrentChapter]);
+
   const dm = nightMode;
   return (
     <div className="mb-1">

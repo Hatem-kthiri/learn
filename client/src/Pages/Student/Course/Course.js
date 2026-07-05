@@ -98,7 +98,7 @@ const Course = () => {
             {course?.data?.map((section, courseIndex) => {
               const scheduleDetails = getScheduleDetails(section._id);
               return (
-                <SlideDown key={section._id} title={section.Name} courseIndex={courseIndex} nightMode={dm}>
+                <SlideDown key={section._id} title={section.Name} isCurrentChapter={section._id === superSkillsId} nightMode={dm}>
                   <div className="space-y-0.5 py-1">
                     {section.superSkills?.map((skill) => {
                       const detail = scheduleDetails.find((d) => d._id === skill._id);
@@ -149,9 +149,17 @@ const Course = () => {
               <div className={`flex items-center justify-center py-24 ${textSecondary}`}>
                 <div className="text-center"><i className="fas fa-spinner fa-spin text-3xl mb-3 block"></i><p className="text-sm">Loading content...</p></div>
               </div>
-            ) : skillsData.length > 0 && (
+            ) : skillsData.length > 0 && (() => {
+              const currentSlide = skillsData[skillsPosition];
+              // Quiz slides have no `type` field at all; checkpoint slides are
+              // regular content (type 0) that embed the checkpoint widget.
+              const isQuizSlide = currentSlide?.type === undefined;
+              const isCheckpointSlide = currentSlide?.content?.includes("checkpoint-preview");
+              const requiresSubmission = isQuizSlide || isCheckpointSlide;
+              const nextDisabled = requiresSubmission && !nextButton;
+              return (
               <>
-                {skillsData[skillsPosition]?.type === 0 ? (
+                {currentSlide?.type === 0 ? (
                   <CourseContent loading={loading} skillsData={skillsData} skillsPosition={skillsPosition} setNextButton={setNextButton} handleNext={handleNext} openLoading={openLoading} nightMode={dm} />
                 ) : (
                   <Quiz loading={loading} skillsData={skillsData[skillsData.length - 1]} skillsPosition={skillsPosition} handleNext={handleNext} setNextButton={setNextButton} skillsId={idSkills} nightMode={dm} />
@@ -164,13 +172,15 @@ const Course = () => {
                     <i className="fas fa-arrow-left text-xs"></i> Previous
                   </button>
                   <span className={`text-sm ${textSecondary}`}>{skillsPosition + 1} / {skillsData.length}</span>
-                  <button onClick={handleNext}
-                    className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-5 py-2.5 rounded-xl text-sm transition-all">
+                  <button onClick={handleNext} disabled={nextDisabled}
+                    title={nextDisabled ? (isQuizSlide ? "Submit the quiz to continue" : "Submit your checkpoint to continue") : undefined}
+                    className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 disabled:bg-slate-200 disabled:text-slate-400 disabled:cursor-not-allowed text-white font-semibold px-5 py-2.5 rounded-xl text-sm transition-all">
                     Next <i className="fas fa-arrow-right text-xs"></i>
                   </button>
                 </div>
               </>
-            )}
+              );
+            })()}
           </div>
         </div>
       </div>

@@ -4,12 +4,32 @@ import { current } from "../../../redux/actions/Actions";
 import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 import Footer from "../../../Components/Footer/Footer";
+import { get_learning_schedule } from "../../../redux/actions/StudentAction";
 
 const Mycourse = () => {
   const dispatch = useDispatch();
   const { user, userLoading } = useSelector((state) => state.LoginReducer);
-  const { night_mode } = useSelector((state) => state.StudentReducer);
+  const { night_mode, learningSchedule } = useSelector((state) => state.StudentReducer);
   useEffect(() => { dispatch(current()); }, []);
+  useEffect(() => { if (!userLoading) dispatch(get_learning_schedule(user)); }, [userLoading]);
+
+  // Finds the furthest-unlocked lesson, i.e. where the student actually left
+  // off, instead of always sending them back to the very first lesson.
+  // Note: get_learning_schedule only fetches a schedule for the student's
+  // first enrolled course, so this only applies to that one (index 0).
+  const getResumePoint = () => {
+    if (!learningSchedule) return null;
+    let lastOpenSkill = null, chapterId = null;
+    for (let i = learningSchedule.learning.length - 1; i >= 0; i--) {
+      const details = learningSchedule.learning[i].details;
+      for (let j = details.length - 1; j >= 0; j--) {
+        if (details[j].open) { lastOpenSkill = details[j]; chapterId = learningSchedule.learning[i]._id; break; }
+      }
+      if (lastOpenSkill) break;
+    }
+    return lastOpenSkill ? [chapterId, lastOpenSkill._id] : null;
+  };
+  const resumePoint = getResumePoint();
 
   return (
     <div className={`min-h-screen flex flex-col ${night_mode ? "bg-gray-900" : "bg-slate-50"}`}>
@@ -24,8 +44,15 @@ const Mycourse = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
             {user.course.map((enrollment, i) => {
               const course = enrollment.course;
-              const resumeId = course?.data?.[0]?.superSkills?.[0]?._id;
+              // For the primary course, resume where they left off; for any
+              // other enrolled course (no schedule fetched for those), fall
+              // back to the start of the course.
+              const [resumeChapterId, resumeSkillId] =
+                i === 0 && resumePoint
+                  ? resumePoint
+                  : [course?.data?.[0]?._id, course?.data?.[0]?.superSkills?.[0]?._id];
               return (
+
                 <div key={i} className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden group hover:shadow-md transition-shadow">
                   {course?.image ? (
                     <div className="h-44 overflow-hidden">
@@ -55,8 +82,8 @@ const Mycourse = () => {
                       <span className="inline-flex items-center px-2.5 py-1 rounded-xl text-xs font-bold bg-indigo-100 text-indigo-700">
                         Score: {enrollment.learnScore || 0}
                       </span>
-                      {resumeId && (
-                        <Link to={`/course/${course.data[0]._id}/${resumeId}`}
+                      {resumeSkillId && (
+                        <Link to={`/course/${resumeChapterId}/${resumeSkillId}`}
                           className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-4 py-2 rounded-xl text-xs transition-colors">
                           <i className="fas fa-play mr-1.5"></i> Continue
                         </Link>

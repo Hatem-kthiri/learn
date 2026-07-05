@@ -21,10 +21,10 @@ export const change_night_mode = (payload) => {
 export const get_learning_schedule = (user) => (dispatch) => {
   axios
     .get(
-      `${url}/api/user/get-learning-schedule/${user._id}/${user.course[0].course._id}`
+      `${url}/api/user/get-learning-schedule/${user._id}/${user.course[0].course._id}`,
     )
     .then((res) =>
-      dispatch({ type: GET_LEARNING_SCHEDULE, payload: res.data.data })
+      dispatch({ type: GET_LEARNING_SCHEDULE, payload: res.data.data }),
     )
 
     .catch((err) => {
@@ -78,13 +78,11 @@ export const add_checkpoint =
         .then((res) => {
           successToast("Checkpoint Submitted");
           dispatch(get_checkpoint({ user, id: checkpointId }));
-          setSubmitLoading(false);
           if (setNextButton) {
             setNextButton(true);
           }
         })
         .catch((err) => {
-          setSubmitLoading(false);
           // console.clear():
         });
     } else {
@@ -126,7 +124,7 @@ export const get_all_checkpoint = (user) => (dispatch) => {
   axios
     .get(`${url}/api/user/get-all-checkpoint/${user._id}`)
     .then((res) =>
-      dispatch({ type: GET_ALL_CHECKPOINT, payload: res.data.data })
+      dispatch({ type: GET_ALL_CHECKPOINT, payload: res.data.data }),
     )
     .catch((err) => {
       // console.clear():
@@ -136,7 +134,7 @@ export const get_student_meeting = (guild) => (dispatch) => {
   axios
     .get(`${url}/api/user/get-meeting/${guild}`)
     .then((res) =>
-      dispatch({ type: GET_STUDENT_MEETING, payload: res.data.data })
+      dispatch({ type: GET_STUDENT_MEETING, payload: res.data.data }),
     )
     .catch((err) => {
       // console.clear():
@@ -147,7 +145,7 @@ export const get_instructor_name = (guild) => (dispatch) => {
   axios
     .get(`${url}/api/user/get-instructor-name/${guild}`)
     .then((res) =>
-      dispatch({ type: GET_STUDENT_INSTRUCTOR_NAME, payload: res.data.data })
+      dispatch({ type: GET_STUDENT_INSTRUCTOR_NAME, payload: res.data.data }),
     )
     .catch((err) => {
       // console.clear():

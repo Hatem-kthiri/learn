@@ -13,6 +13,7 @@ const Checkpoint = require("../models/Checkpoint");
 const QuizScore = require("../models/QuizScore");
 const learningSchedule = require("../models/learningSchedule");
 const Workshop = require("../models/Workshop");
+const Course = require("../models/Course");
 const validate = require("../middlewares/validate");
 const v = require("../validators/userValidators");
 
@@ -284,6 +285,93 @@ router.put(
     }
   },
 );
+
+// Unlock and return the next lesson after a student finishes the current one.
+// Looks the current lesson up by its real _id (not array index) so it stays
+// correct even if the schedule and course docs get out of sync in ordering.
+router.put("/open-skill", validate(v.openSkill), async (req, res) => {
+  try {
+    const { userId, courseId, superSkillsId, skillsId } = req.body;
+
+    const schedule = await learningSchedule.findOne({
+      student: userId,
+      courseId,
+    });
+    if (!schedule) {
+      return res.status(404).json({ error: "Learning schedule not found" });
+    }
+
+    const chapterIndex = schedule.learning.findIndex(
+      (chapter) => String(chapter._id) === String(superSkillsId),
+    );
+    if (chapterIndex === -1) {
+      return res.status(404).json({ error: "Chapter not found in learning schedule" });
+    }
+
+    const details = schedule.learning[chapterIndex].details;
+    const skillIndex = details.findIndex(
+      (detail) => String(detail._id) === String(skillsId),
+    );
+    if (skillIndex === -1) {
+      return res.status(404).json({ error: "Skill not found in learning schedule" });
+    }
+
+    // Work out where the next lesson lives: same chapter, next slot — or the
+    // first lesson of the next chapter if we're at the end of this one.
+    let nextChapterIndex = chapterIndex;
+    let nextSkillIndex = skillIndex + 1;
+    if (nextSkillIndex >= details.length) {
+      nextChapterIndex += 1;
+      nextSkillIndex = 0;
+    }
+
+    if (nextChapterIndex >= schedule.learning.length) {
+      return res.status(200).json({ message: "Course completed", nextSkill: null });
+    }
+
+    const nextDetail =
+      schedule.learning[nextChapterIndex].details[nextSkillIndex];
+
+    if (!nextDetail.open) {
+      nextDetail.open = true;
+      nextDetail.updated = new Date();
+      await schedule.save();
+    }
+
+    // Pull the actual lesson content from the course document itself —
+    // the learning schedule only tracks progress, not the slides/quiz.
+    // Use a positional projection so Mongo only returns the one matching
+    // chapter, not the whole course (which can be several MB of HTML/quiz
+    // content across every lesson) — this was the main source of the delay
+    // students were seeing when moving to the next lesson.
+    const nextChapterId = schedule.learning[nextChapterIndex]._id;
+    const course = await Course.findOne(
+      { _id: courseId, "data._id": nextChapterId },
+      { "data.$": 1 },
+    ).lean();
+    const chapter = course?.data?.[0];
+    const skill = chapter?.superSkills?.find(
+      (s) => String(s._id) === String(nextDetail._id),
+    );
+
+    if (!skill) {
+      return res.status(404).json({ error: "Next lesson content not found" });
+    }
+
+    res.status(200).json({
+      message: "Skill unlocked",
+      nextSuperSkillsId: nextChapterId,
+      nextSkill: {
+        _id: skill._id,
+        skillsName: skill.skillsName,
+        skillsData: skill.skillsData,
+      },
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Failed to open next skill" });
+  }
+});
 
 router.get("/get-students-progress", async (req, res) => {
   try {

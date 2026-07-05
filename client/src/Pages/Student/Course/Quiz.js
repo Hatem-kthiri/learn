@@ -24,9 +24,14 @@ const Quiz = ({ skillsData, handleNext, setNextButton }) => {
   const imageLinkRegex = /(https?:\/\/.*\.(?:png|jpg|jpeg|gif))/i;
 
   useEffect(() => {
+    setWait(true);
+    setQuizAlreadySubmitted(undefined);
     axios.get(`${url}/api/user/get-quiz/${user._id}/${skillsId}`)
-      .then((r) => { setQuizAlreadySubmitted(r.data.data); setWait(false); setNextButton(true); })
-      .catch(() => {});
+      .then((r) => { setQuizAlreadySubmitted(r.data.data); setNextButton(true); })
+      // A 404 here just means "not submitted yet" - the normal first-view case,
+      // not an error. Either way, stop waiting so the quiz UI can render.
+      .catch(() => {})
+      .finally(() => setWait(false));
   }, [skillsId]);
 
   useEffect(() => {
@@ -41,14 +46,37 @@ const Quiz = ({ skillsData, handleNext, setNextButton }) => {
     setChoicesState(updated);
   };
 
+  const calculateScore = () => {
+    let correct = 0;
+    skillsData.questions.forEach((q, qi) => {
+      const isFullyCorrect = q.choices.every(
+        (c, ci) => Boolean(choicesState[qi]?.[ci]) === c.isCorrect
+      );
+      if (isFullyCorrect) correct++;
+    });
+    return Math.round((correct / skillsData.questions.length) * 100);
+  };
+
   const handleSubmit = () => {
     setSubmitLoading(true);
-    const answers = skillsData.questions.map((q, i) => ({
+    const quizResponse = skillsData.questions.map((q, i) => ({
       question: q.question,
       choices: q.choices.map((c, j) => ({ ...c, selected: choicesState[i][j] })),
     }));
-    axios.post(`${url}/api/user/submit-quiz`, { userId: user._id, skillsId, answers, courseId: user.course[0].course._id })
-      .then(() => { setSubmitted(true); setShowAnswer(true); setNextButton(true); setSubmitLoading(false); })
+    // Matches the same endpoint/shape used by QuizTypeOne/QuizTypeTwo.
+    axios
+      .post(`${url}/api/user/add-Quiz-Score/${user._id}`, {
+        quizScore: calculateScore(),
+        quizId: skillsId,
+        response: { assessmentType: 0, quizResponse },
+      })
+      .then((res) => {
+        setQuizAlreadySubmitted(res.data.data);
+        setSubmitted(true);
+        setShowAnswer(true);
+        setNextButton(true);
+        setSubmitLoading(false);
+      })
       .catch(() => setSubmitLoading(false));
   };
 
@@ -63,7 +91,7 @@ const Quiz = ({ skillsData, handleNext, setNextButton }) => {
       <div>
         <div className="flex items-center gap-3 mb-6 p-4 bg-emerald-50 border border-emerald-200 rounded-2xl">
           <div className="w-10 h-10 bg-emerald-100 rounded-xl flex items-center justify-center flex-shrink-0"><i className="fas fa-check-circle text-emerald-600"></i></div>
-          <div><p className="font-bold text-slate-900">Quiz Completed!</p><p className="text-sm text-emerald-600">Score: {quizAlreadySubmitted.score}/{skillsData.questions?.length}</p></div>
+          <div><p className="font-bold text-slate-900">Quiz Completed!</p><p className="text-sm text-emerald-600">Score: {quizAlreadySubmitted.quizScore}%</p></div>
         </div>
         <div className="space-y-5">
           {skillsData.questions?.map((q, qi) => (

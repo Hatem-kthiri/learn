@@ -6,7 +6,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { current } from "../../../redux/actions/Actions";
 import HeaderS from "../../../Components/Header/HeaderS";
 import Quiz from "./Quiz";
-import { scrollToElement, url } from "../../../utils";
+import { scrollToElement, successToast, url } from "../../../utils";
 import SlideDown from "./SlideDown";
 import { get_learning_schedule } from "../../../redux/actions/StudentAction";
 
@@ -40,14 +40,23 @@ const Course = () => {
     if (skillsPosition < skillsData.length - 1) { setSkillsPosition(skillsPosition + 1); return; }
     setOpenLoading(true);
     try {
-      const res = await axios.put(`${url}/api/student/open-skill`, { userId: user._id, superSkillsId, skillsId });
+      const res = await axios.put(`${url}/api/user/open-skill`, {
+        userId: user._id,
+        courseId: course._id,
+        superSkillsId,
+        skillsId,
+      });
       dispatch(get_learning_schedule(user));
       const nextSkill = res.data.nextSkill;
       if (nextSkill) {
         setIdSkills(nextSkill._id);
         setSkillsData(nextSkill.skillsData);
         setSkillsPosition(0);
-        navigate(`/course/${superSkillsId}/${nextSkill._id}`);
+        // The next lesson can be in a different chapter, so use the chapter id
+        // the backend resolved rather than assuming it's the current one.
+        navigate(`/course/${res.data.nextSuperSkillsId}/${nextSkill._id}`);
+      } else {
+        successToast("You've completed this course! 🎉");
       }
     } catch (e) { console.log(e); } finally { setOpenLoading(false); }
   };
@@ -89,7 +98,7 @@ const Course = () => {
             {course?.data?.map((section, courseIndex) => {
               const scheduleDetails = getScheduleDetails(section._id);
               return (
-                <SlideDown key={section._id} title={section.title} courseIndex={courseIndex} nightMode={dm}>
+                <SlideDown key={section._id} title={section.Name} courseIndex={courseIndex} nightMode={dm}>
                   <div className="space-y-0.5 py-1">
                     {section.superSkills?.map((skill) => {
                       const detail = scheduleDetails.find((d) => d._id === skill._id);
@@ -142,7 +151,7 @@ const Course = () => {
               </div>
             ) : skillsData.length > 0 && (
               <>
-                {skillsData[skillsPosition]?.type === 0 || skillsData[skillsPosition]?.type === undefined ? (
+                {skillsData[skillsPosition]?.type === 0 ? (
                   <CourseContent loading={loading} skillsData={skillsData} skillsPosition={skillsPosition} setNextButton={setNextButton} handleNext={handleNext} openLoading={openLoading} nightMode={dm} />
                 ) : (
                   <Quiz loading={loading} skillsData={skillsData[skillsData.length - 1]} skillsPosition={skillsPosition} handleNext={handleNext} setNextButton={setNextButton} skillsId={idSkills} nightMode={dm} />

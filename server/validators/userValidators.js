@@ -85,6 +85,13 @@ exports.updateOpenCourse = [
     .withMessage("Invalid learning schedule id"),
 ];
 
+exports.openSkill = [
+  body("userId").custom(objectId).withMessage("Invalid user id"),
+  body("courseId").custom(objectId).withMessage("Invalid course id"),
+  body("superSkillsId").notEmpty().withMessage("superSkillsId is required"),
+  body("skillsId").notEmpty().withMessage("skillsId is required"),
+];
+
 exports.updateLearnProgress = [
   param("userId").custom(objectId).withMessage("Invalid user id"),
   body("learnProgress").notEmpty().withMessage("learnProgress is required"),

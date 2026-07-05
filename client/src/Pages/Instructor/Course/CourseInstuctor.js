@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { current } from "../../../redux/actions/Actions";
 import HeaderI from "../../../Components/Header/HeaderI";
@@ -11,6 +11,7 @@ const CourseInstructor = () => {
   const { user, userLoading } = useSelector((state) => state.LoginReducer);
   const { courseId, superSkillsId, skillsId } = useParams();
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const [course, setCourse] = useState();
   const [skillsData, setSkillsData] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -44,8 +45,55 @@ const CourseInstructor = () => {
   }, [course, skillsId]);
 
   useEffect(() => {
-    setIsQuizSlide(currentSkill?.skillsData[skillsPosition].type === undefined);
-  }, [skillsPosition]);
+    setIsQuizSlide(
+      currentSkill?.skillsData?.[skillsPosition]?.type === undefined
+    );
+  }, [skillsPosition, currentSkill]);
+
+  // Preview mode has no persisted progress, so "next/previous lesson" is just
+  // walking a flattened, ordered list of every lesson across every chapter.
+  const getFlatSkills = () => {
+    const flat = [];
+    for (const section of course?.data || []) {
+      for (const skill of section.superSkills || []) {
+        flat.push({ chapterId: section._id, skill });
+      }
+    }
+    return flat;
+  };
+
+  const currentFlatIndex = () =>
+    getFlatSkills().findIndex((f) => f.skill._id === skillsId);
+
+  const isFirstSlideOverall = skillsPosition === 0 && currentFlatIndex() <= 0;
+  const flatSkills = getFlatSkills();
+  const isLastSlideOverall =
+    skillsPosition === skillsData.length - 1 &&
+    currentFlatIndex() === flatSkills.length - 1;
+
+  const handlePrevious = () => {
+    if (skillsPosition > 0) {
+      setSkillsPosition(skillsPosition - 1);
+      return;
+    }
+    const idx = currentFlatIndex();
+    if (idx > 0) {
+      const prev = flatSkills[idx - 1];
+      navigate(`/course/${courseId}/${prev.chapterId}/${prev.skill._id}`);
+    }
+  };
+
+  const handleNext = () => {
+    if (skillsPosition < skillsData.length - 1) {
+      setSkillsPosition(skillsPosition + 1);
+      return;
+    }
+    const idx = currentFlatIndex();
+    if (idx !== -1 && idx < flatSkills.length - 1) {
+      const next = flatSkills[idx + 1];
+      navigate(`/course/${courseId}/${next.chapterId}/${next.skill._id}`);
+    }
+  };
 
   return (
     <div className="h-screen flex flex-col bg-slate-50">
@@ -151,21 +199,15 @@ const CourseInstructor = () => {
 
                 <div className="flex items-center justify-between mt-8 pt-6 border-t border-slate-100">
                   <button
-                    onClick={() =>
-                      setSkillsPosition(Math.max(0, skillsPosition - 1))
-                    }
-                    disabled={skillsPosition === 0}
+                    onClick={handlePrevious}
+                    disabled={isFirstSlideOverall}
                     className="flex items-center gap-2 bg-white border border-slate-200 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed text-slate-700 font-semibold px-5 py-2.5 rounded-xl text-sm transition-all"
                   >
                     <i className="fas fa-arrow-left text-xs"></i> Previous
                   </button>
                   <button
-                    onClick={() =>
-                      setSkillsPosition(
-                        Math.min(skillsData.length - 1, skillsPosition + 1),
-                      )
-                    }
-                    disabled={skillsPosition === skillsData.length - 1}
+                    onClick={handleNext}
+                    disabled={isLastSlideOverall}
                     className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 disabled:bg-slate-200 disabled:text-slate-400 text-white font-semibold px-5 py-2.5 rounded-xl text-sm transition-all"
                   >
                     Next <i className="fas fa-arrow-right text-xs"></i>

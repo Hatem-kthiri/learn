@@ -292,7 +292,6 @@ router.put(
 router.put("/open-skill", validate(v.openSkill), async (req, res) => {
   try {
     const { userId, courseId, superSkillsId, skillsId } = req.body;
-
     const schedule = await learningSchedule.findOne({
       student: userId,
       courseId,
@@ -305,7 +304,9 @@ router.put("/open-skill", validate(v.openSkill), async (req, res) => {
       (chapter) => String(chapter._id) === String(superSkillsId),
     );
     if (chapterIndex === -1) {
-      return res.status(404).json({ error: "Chapter not found in learning schedule" });
+      return res
+        .status(404)
+        .json({ error: "Chapter not found in learning schedule" });
     }
 
     const details = schedule.learning[chapterIndex].details;
@@ -313,7 +314,9 @@ router.put("/open-skill", validate(v.openSkill), async (req, res) => {
       (detail) => String(detail._id) === String(skillsId),
     );
     if (skillIndex === -1) {
-      return res.status(404).json({ error: "Skill not found in learning schedule" });
+      return res
+        .status(404)
+        .json({ error: "Skill not found in learning schedule" });
     }
 
     // Work out where the next lesson lives: same chapter, next slot — or the
@@ -326,38 +329,42 @@ router.put("/open-skill", validate(v.openSkill), async (req, res) => {
     }
 
     if (nextChapterIndex >= schedule.learning.length) {
-      return res.status(200).json({ message: "Course completed", nextSkill: null });
+      return res
+        .status(200)
+        .json({ message: "Course completed", nextSkill: null });
     }
 
     const nextDetail =
       schedule.learning[nextChapterIndex].details[nextSkillIndex];
-
     if (!nextDetail.open) {
       nextDetail.open = true;
       nextDetail.updated = new Date();
       await schedule.save();
     }
 
-    // Pull the actual lesson content from the course document itself —
-    // the learning schedule only tracks progress, not the slides/quiz.
-    // Use a positional projection so Mongo only returns the one matching
-    // chapter, not the whole course (which can be several MB of HTML/quiz
-    // content across every lesson) — this was the main source of the delay
-    // students were seeing when moving to the next lesson.
     const nextChapterId = schedule.learning[nextChapterIndex]._id;
-    const course = await Course.findOne(
-      { _id: courseId, "data._id": nextChapterId },
-      { "data.$": 1 },
-    ).lean();
-    const chapter = course?.data?.[0];
+    const course = await Course.aggregate([
+      {
+        $match: {
+          _id: new mongoose.Types.ObjectId(courseId),
+        },
+      },
+      { $unwind: "$data" },
+      {
+        $match: {
+          "data._id": new mongoose.Types.ObjectId(nextChapterId),
+        },
+      },
+    ]);
+
+    const chapter = course[0].data;
     const skill = chapter?.superSkills?.find(
       (s) => String(s._id) === String(nextDetail._id),
     );
-
     if (!skill) {
       return res.status(404).json({ error: "Next lesson content not found" });
     }
-
+    console.log(skill);
     res.status(200).json({
       message: "Skill unlocked",
       nextSuperSkillsId: nextChapterId,

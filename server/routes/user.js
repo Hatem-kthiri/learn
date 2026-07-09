@@ -151,7 +151,6 @@ router.get("/loggedUser", isAuth, async (req, res) => {
 // Create a new checkpoint
 router.post("/add-checkpoint", validate(v.addCheckpoint), async (req, res) => {
   try {
-    console.log("test");
     const { checkpointName, checkpointId, student, guild, link } = req.body;
 
     const findCheckpoint = await Checkpoint.findOne({
@@ -293,6 +292,7 @@ router.put(
 router.put("/open-skill", validate(v.openSkill), async (req, res) => {
   try {
     const { userId, courseId, superSkillsId, skillsId } = req.body;
+
     const schedule = await learningSchedule.findOne({
       student: userId,
       courseId,
@@ -305,9 +305,7 @@ router.put("/open-skill", validate(v.openSkill), async (req, res) => {
       (chapter) => String(chapter._id) === String(superSkillsId),
     );
     if (chapterIndex === -1) {
-      return res
-        .status(404)
-        .json({ error: "Chapter not found in learning schedule" });
+      return res.status(404).json({ error: "Chapter not found in learning schedule" });
     }
 
     const details = schedule.learning[chapterIndex].details;
@@ -315,10 +313,27 @@ router.put("/open-skill", validate(v.openSkill), async (req, res) => {
       (detail) => String(detail._id) === String(skillsId),
     );
     if (skillIndex === -1) {
-      return res
-        .status(404)
-        .json({ error: "Skill not found in learning schedule" });
+      return res.status(404).json({ error: "Skill not found in learning schedule" });
     }
+
+    // Recalculate overall course progress now that this lesson is done.
+    // Nothing on the frontend ever called the old updateLearnProgress route,
+    // so this is the only place progress actually gets updated.
+    const totalSkills = schedule.learning.reduce(
+      (sum, ch) => sum + ch.details.length,
+      0,
+    );
+    let completedSkills = 0;
+    for (let i = 0; i < chapterIndex; i++) {
+      completedSkills += schedule.learning[i].details.length;
+    }
+    completedSkills += skillIndex + 1;
+    const learnProgress =
+      totalSkills > 0 ? Math.round((completedSkills / totalSkills) * 100) : 0;
+    await Student.updateOne(
+      { _id: userId, "course.course": courseId },
+      { $set: { "course.$.learnProgress": learnProgress } },
+    );
 
     // Work out where the next lesson lives: same chapter, next slot — or the
     // first lesson of the next chapter if we're at the end of this one.
@@ -330,9 +345,7 @@ router.put("/open-skill", validate(v.openSkill), async (req, res) => {
     }
 
     if (nextChapterIndex >= schedule.learning.length) {
-      return res
-        .status(200)
-        .json({ message: "Course completed", nextSkill: null });
+      return res.status(200).json({ message: "Course completed", nextSkill: null, learnProgress: 100 });
     }
 
     const nextDetail =
@@ -340,35 +353,34 @@ router.put("/open-skill", validate(v.openSkill), async (req, res) => {
     if (!nextDetail.open) {
       nextDetail.open = true;
       nextDetail.updated = new Date();
+      // `details` has no explicit schema type (Mixed), so Mongoose can't
+      // auto-detect mutations to objects inside it — without this line,
+      // save() silently writes nothing for this field.
       schedule.markModified("learning");
       await schedule.save();
     }
 
+    // Pull the actual lesson content from the course document itself —
+    // the learning schedule only tracks progress, not the slides/quiz.
     const nextChapterId = schedule.learning[nextChapterIndex]._id;
     const course = await Course.aggregate([
-      {
-        $match: {
-          _id: new mongoose.Types.ObjectId(courseId),
-        },
-      },
+      { $match: { _id: new mongoose.Types.ObjectId(courseId) } },
       { $unwind: "$data" },
-      {
-        $match: {
-          "data._id": new mongoose.Types.ObjectId(nextChapterId),
-        },
-      },
+      { $match: { "data._id": new mongoose.Types.ObjectId(nextChapterId) } },
     ]);
 
-    const chapter = course[0].data;
+    const chapter = course[0]?.data;
     const skill = chapter?.superSkills?.find(
       (s) => String(s._id) === String(nextDetail._id),
     );
     if (!skill) {
       return res.status(404).json({ error: "Next lesson content not found" });
     }
+
     res.status(200).json({
       message: "Skill unlocked",
       nextSuperSkillsId: nextChapterId,
+      learnProgress,
       nextSkill: {
         _id: skill._id,
         skillsName: skill.skillsName,

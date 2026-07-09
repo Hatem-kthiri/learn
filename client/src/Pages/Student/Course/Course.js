@@ -47,6 +47,7 @@ const Course = () => {
         skillsId,
       });
       dispatch(get_learning_schedule(user));
+      dispatch(current());
       const nextSkill = res.data.nextSkill;
       if (nextSkill) {
         setIdSkills(nextSkill._id);

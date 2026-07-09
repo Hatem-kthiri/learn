@@ -31,7 +31,7 @@ const DashboardStudent = () => {
   const calcScore = () => {
     let q = 0, c = 0;
     studentQuizScore?.forEach((s) => (q += +s.quizScore));
-    studentCheckpointScore?.forEach((s) => (c += +s.checkpointScore));
+    studentCheckpointScore?.forEach((s) => (c += +s.score));
     return q + c;
   };
   const calcProgress = () => Math.round(user.course?.[0]?.learnProgress || 0);

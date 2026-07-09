@@ -170,22 +170,24 @@ const Quiz = ({
         )}
 
         <div className="space-y-2">
-          {skillsData.statements.map((element, index) => (
-            <div
-              key={index}
-              className="flex items-center justify-between gap-3 px-4 py-3 bg-emerald-50 border border-emerald-200 rounded-xl"
-            >
-              <div className="flex items-center gap-3">
-                <span className="w-5 h-5 rounded-full bg-emerald-500 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
-                  {index + 1}
-                </span>
-                <span className="text-sm font-medium text-emerald-800">
-                  {element.text}
-                </span>
+          {skillsData?.statements?.map((element, index) => {
+            return (
+              <div
+                key={index}
+                className="flex items-center justify-between gap-3 px-4 py-3 bg-emerald-50 border border-emerald-200 rounded-xl"
+              >
+                <div className="flex items-center gap-3">
+                  <span className="w-5 h-5 rounded-full bg-emerald-500 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
+                    {index + 1}
+                  </span>
+                  <span className="text-sm font-medium text-emerald-800">
+                    {element.text}
+                  </span>
+                </div>
+                <i className="fas fa-grip-lines text-emerald-400 cursor-grab"></i>
               </div>
-              <i className="fas fa-grip-lines text-emerald-400 cursor-grab"></i>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
     </div>

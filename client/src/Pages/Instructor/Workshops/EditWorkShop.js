@@ -8,13 +8,15 @@ const EditWorkShop = ({ editConfig, closeModal, workshopId }) => {
   const [loading, setLoading] = useState(false);
   const [workshop, setWorkshop] = useState({});
   const dispatch = useDispatch();
+  const instructorGuilds = Array.isArray(user?.guild) ? user.guild : (user?.guild ? [user.guild] : []);
   const handleChange = (e) => setWorkshop({ ...workshopId, ...workshop, [e.target.name]: e.target.value });
   const handleEdit = () => { setLoading(true); dispatch(update_workshop({ workshop: { ...workshopId, ...workshop }, user, setLoading, closeModal })); };
 
   if (!editConfig?.show) return null;
 
+  // NOTE: field name must be "name" (not "title") to match the Workshop schema/validator
   const fields = [
-    { name: "title", label: "Title", type: "text", val: workshopId?.title },
+    { name: "name", label: "Title", type: "text", val: workshopId?.name },
     { name: "link", label: "Link", type: "url", val: workshopId?.link },
     { name: "date", label: "Date", type: "date", val: workshopId?.date?.slice(0, 10) },
   ];
@@ -30,6 +32,19 @@ const EditWorkShop = ({ editConfig, closeModal, workshopId }) => {
           </button>
         </div>
         <div className="p-6 space-y-4">
+          <div>
+            <label className="block text-sm font-semibold text-slate-700 mb-2">Guild</label>
+            <select name="guild" defaultValue={workshopId?.guild || ""} onChange={handleChange}
+              className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all">
+              <option value="" disabled>Select a guild</option>
+              {instructorGuilds.map((g) => (
+                <option key={g} value={g}>{g}</option>
+              ))}
+            </select>
+            {instructorGuilds.length === 0 && (
+              <p className="text-xs text-red-500 mt-1">You are not assigned to any guild yet.</p>
+            )}
+          </div>
           {fields.map((f) => (
             <div key={f.name}>
               <label className="block text-sm font-semibold text-slate-700 mb-2">{f.label}</label>

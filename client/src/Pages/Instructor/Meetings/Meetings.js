@@ -19,31 +19,54 @@ const Meetings = () => {
   useEffect(() => { dispatch(current()); }, []);
   useEffect(() => { if (!userLoading) dispatch(get_meetings(user)); }, [user, userLoading]);
 
+  // Guilds the logged-in instructor actually belongs to (array of guild names)
+  const instructorGuilds = Array.isArray(user?.guild) ? user.guild : (user?.guild ? [user.guild] : []);
+
   const handleChange = (e) => setMeetDetails({ ...meetDetails, [e.target.name]: e.target.value });
 
   const handleSubmit = async () => {
-    if (!meetDetails.name || !meetDetails.link || !meetDetails.guild) { toast.error("Please fill all fields"); return; }
+    // Backend field is "time", not "date" - keep meetDetails.time as the source of truth
+    if (!meetDetails.name || !meetDetails.link || !meetDetails.guild || !meetDetails.time) { toast.error("Please fill all fields"); return; }
     if (editId) {
-      dispatch(update_meeting({ user, meetDetails: { ...meetDetails, _id: editId } }));
+      dispatch(
+        update_meeting({
+          user,
+          modalEditDetails: { _id: editId },
+          meetDetails,
+          handleModalEditShow: setShowAdd,
+        })
+      );
       setEditId(null);
     } else {
-      dispatch(add_meeting({ user, meetDetails }));
+      dispatch(
+        add_meeting({
+          user,
+          meetDetails,
+          handleModalAddShow: setShowAdd,
+          resetForm: () => setMeetDetails({}),
+        })
+      );
     }
     setMeetDetails({}); setShowAdd(false);
   };
 
   const handleDelete = (id) => {
     Swal.fire({ title: "Delete meeting?", icon: "warning", showCancelButton: true, confirmButtonColor: "#4f46e5", cancelButtonColor: "#ef4444", confirmButtonText: "Yes, delete" })
-      .then((r) => { if (r.isConfirmed) dispatch(delete_meeting({ user, meetingId: id })); });
+      .then((r) => { if (r.isConfirmed) dispatch(delete_meeting({ user, id })); });
   };
 
-  const handleEdit = (meeting) => { setMeetDetails(meeting); setEditId(meeting._id); setShowAdd(true); };
+  const handleEdit = (meeting) => {
+    // Normalize "time" back into the datetime-local input format (YYYY-MM-DDTHH:mm)
+    const timeValue = meeting.time ? new Date(meeting.time).toISOString().slice(0, 16) : "";
+    setMeetDetails({ ...meeting, time: timeValue });
+    setEditId(meeting._id);
+    setShowAdd(true);
+  };
 
   const fields = [
     { name: "name", label: "Meeting Name", type: "text", placeholder: "e.g. Weekly Standup" },
     { name: "link", label: "Meeting Link", type: "url", placeholder: "https://meet.google.com/..." },
-    { name: "guild", label: "Guild", type: "text", placeholder: "Guild name", val: user.guild },
-    { name: "date", label: "Date & Time", type: "datetime-local", placeholder: "" },
+    { name: "time", label: "Date & Time", type: "datetime-local", placeholder: "" },
   ];
 
   return (
@@ -67,10 +90,23 @@ const Meetings = () => {
           <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 mb-6">
             <h2 className="font-bold text-slate-900 mb-5">{editId ? "Edit Meeting" : "Schedule New Meeting"}</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-5">
+              <div>
+                <label className="block text-sm font-semibold text-slate-700 mb-2">Guild</label>
+                <select name="guild" value={meetDetails.guild || ""} onChange={handleChange}
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all">
+                  <option value="" disabled>Select a guild</option>
+                  {instructorGuilds.map((g) => (
+                    <option key={g} value={g}>{g}</option>
+                  ))}
+                </select>
+                {instructorGuilds.length === 0 && (
+                  <p className="text-xs text-red-500 mt-1">You are not assigned to any guild yet.</p>
+                )}
+              </div>
               {fields.map((f) => (
                 <div key={f.name}>
                   <label className="block text-sm font-semibold text-slate-700 mb-2">{f.label}</label>
-                  <input type={f.type} name={f.name} placeholder={f.placeholder} value={meetDetails[f.name] || f.val || ""}
+                  <input type={f.type} name={f.name} placeholder={f.placeholder} value={meetDetails[f.name] || ""}
                     onChange={handleChange}
                     className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all" />
                 </div>

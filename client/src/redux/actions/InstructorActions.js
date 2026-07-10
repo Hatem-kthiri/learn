@@ -113,13 +113,13 @@ export const add_meeting =
     axios
       .post(`${url}/api/instructor/add-meeting/${user._id}`, meetDetails)
       .then((res) => {
-        handleModalAddShow(false);
+        if (typeof handleModalAddShow === "function") handleModalAddShow(false);
         successToast("Meeting Added Succesfully");
-        resetForm();
+        if (typeof resetForm === "function") resetForm();
         dispatch(get_meetings(user));
       })
       .catch((err) => {
-        // console.clear():
+        errorToast(err?.response?.data?.message || err?.response?.data?.errors?.[0]?.msg || "Failed to add meeting");
       });
   };
 export const update_meeting =
@@ -127,16 +127,16 @@ export const update_meeting =
   (dispatch) => {
     axios
       .put(
-        `${url}/api/instructor/update-meeting/${modalEditDetails._id}`,
+        `${url}/api/instructor/update-meeting/${modalEditDetails?._id}`,
         meetDetails
       )
       .then((res) => {
         dispatch(get_meetings(user));
-        handleModalEditShow(false);
+        if (typeof handleModalEditShow === "function") handleModalEditShow(false);
         successToast("Meeting updated Succesfully");
       })
       .catch((err) => {
-        // console.clear():
+        errorToast(err?.response?.data?.message || "Failed to update meeting");
       });
   };
 
@@ -150,7 +150,7 @@ export const delete_meeting =
         successToast("Meeting Deleted");
       })
       .catch((err) => {
-        // console.clear():
+        errorToast(err?.response?.data?.message || "Failed to delete meeting");
       });
   };
 /*
@@ -177,7 +177,7 @@ export const add_workshop =
         closeModal();
       })
       .catch((err) => {
-        // console.clear():
+        errorToast(err?.response?.data?.message || err?.response?.data?.errors?.[0]?.msg || "Failed to add workshop");
         setLoading(false);
       });
   };
@@ -195,7 +195,7 @@ export const update_workshop =
         closeModal();
       })
       .catch((err) => {
-        // console.clear():
+        errorToast(err?.response?.data?.message || "Failed to update workshop");
         setLoading(false);
       });
   };
@@ -209,7 +209,7 @@ export const delete_workshop =
         successToast("Workshop Deleted ");
       })
       .catch((err) => {
-        // console.clear():
+        errorToast(err?.response?.data?.message || "Failed to delete workshop");
       });
   };
 export const update_instructor_password =

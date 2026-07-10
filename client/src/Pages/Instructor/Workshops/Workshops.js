@@ -21,7 +21,7 @@ const Workshops = () => {
 
   const handleDelete = (id) => {
     Swal.fire({ title: "Delete workshop?", icon: "warning", showCancelButton: true, confirmButtonColor: "#4f46e5", cancelButtonColor: "#ef4444", confirmButtonText: "Yes, delete" })
-      .then((r) => { if (r.isConfirmed) dispatch(delete_workshop({ user, workshopId: id })); });
+      .then((r) => { if (r.isConfirmed) dispatch(delete_workshop({ user, id })); });
   };
 
   const handleEditShow = (id) => {
@@ -55,7 +55,14 @@ const Workshops = () => {
                 </div>
               )}
               <div className="p-5">
-                <h3 className="font-bold text-slate-900 mb-1">{workshop.title}</h3>
+                <div className="flex items-center justify-between mb-1">
+                  <h3 className="font-bold text-slate-900">{workshop.name}</h3>
+                  {workshop.guild && (
+                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-indigo-100 text-indigo-700">
+                      <i className="fas fa-award mr-1 text-xs"></i>{workshop.guild}
+                    </span>
+                  )}
+                </div>
                 <p className="text-slate-500 text-sm line-clamp-2 mb-4">{workshop.description}</p>
                 {workshop.date && <p className="text-xs text-slate-400 mb-4"><i className="fas fa-calendar-alt mr-1.5"></i>{new Date(workshop.date).toLocaleDateString()}</p>}
                 {workshop.link && (

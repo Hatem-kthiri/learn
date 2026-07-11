@@ -12,7 +12,7 @@ import axios from "axios";
 import GroupChatModal from "./GroupChatModal";
 
 const getSender = (loggedUser, users) =>
-  users?.find((u) => u._id !== loggedUser?._id);
+  users?.find((u) => u && u._id !== loggedUser?._id);
 
 const calculateTimeDiff = (date) => {
   if (!date) return "";
@@ -56,7 +56,7 @@ const MyChats = ({ fetchAgain }) => {
     }
     setLoading(true);
     try {
-      const { data } = await axios.get(`${url}/api/v1/user/search?search=${q}`);
+      const { data } = await axios.get(`${url}/api/v1/chat/users?search=${q}`);
       setSearchResult(data);
     } catch {
       toast.error("Search failed");

@@ -31,13 +31,7 @@ function App() {
   const { night_mode } = useSelector((state) => state.StudentReducer);
   const { user } = useSelector((state) => state.LoginReducer);
   useEffect(() => {
-    /* eslint-disable-next-line*/
-    if (localStorage.getItem("night_mode") == "true") {
-      document.querySelector("html").classList.add("night");
-    } else {
-      document.querySelector("html").classList.remove("night");
-    }
-    /* eslint-disable-next-line*/
+    document.querySelector("html").classList.toggle("dark", night_mode);
   }, [night_mode]);
   const location = useLocation();
 
@@ -47,12 +41,7 @@ function App() {
   const isLearnChat = location.pathname === "/learn-chat";
   const isCourse = location.pathname === "/course/";
   return (
-    <div
-      className={
-        /* eslint-disable-next-line*/
-        localStorage.getItem("night_mode") == "true" ? "night-mode" : ""
-      }
-    >
+    <div className={night_mode ? "dark" : ""}>
       <Routes>
         <Route exact path="/" element={<Navigate to="/login" />} />
 

@@ -9,17 +9,13 @@ import axios from "axios";
 import UpdateGroupChatModal from "./UpdateGroupChatModal";
 import { modal_config } from "../../redux/actions/ChatsActions";
 
-let socket, selectedChatCompare;
-
 const getSender = (loggedUser, users) =>
-  users?.find((u) => u._id !== loggedUser?._id);
+  users?.find((u) => u && u._id !== loggedUser?._id);
 const isMine = (loggedUser, sender) => sender?._id === loggedUser?._id;
 
 const SingleChat = ({ fetchAgain, setFetchAgain }) => {
   const { user } = useSelector((state) => state.LoginReducer);
-  const { selectedChat, notification } = useSelector(
-    (state) => state.ChatReducer,
-  );
+  const { selectedChat } = useSelector((state) => state.ChatReducer);
   const dispatch = useDispatch();
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -27,10 +23,12 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
   const [socketConnected, setSocketConnected] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
   const messagesEndRef = useRef(null);
+  const socketRef = useRef(null);
+  const selectedChatRef = useRef(null);
 
-  const scrollToBottom = () =>
+  useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  useEffect(scrollToBottom, [messages]);
+  }, [messages]);
 
   const fetchMessages = async () => {
     if (!selectedChat) return;
@@ -40,7 +38,7 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
         `${url}/api/v1/message/${selectedChat._id}`,
       );
       setMessages(data);
-      socket.emit("join-chat", selectedChat._id);
+      socketRef.current?.emit("join-chat", selectedChat._id);
     } catch {
       toast.error("Failed to load messages");
     } finally {
@@ -50,7 +48,7 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
 
   const sendMessage = async (e) => {
     if ((e.key === "Enter" && newMessage) || (e === "click" && newMessage)) {
-      socket.emit("stop-typing", selectedChat._id);
+      socketRef.current?.emit("stop-typing", selectedChat._id);
       try {
         const { data } = await axios.post(`${url}/api/v1/message/`, {
           message: newMessage,
@@ -58,8 +56,8 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
           userConnected: user._id,
         });
         setNewMessage("");
-        socket.emit("new-message", data);
-        setMessages([...messages, data]);
+        socketRef.current?.emit("new-message", data);
+        setMessages((prev) => [...prev, data]);
       } catch {
         toast.error("Failed to send message");
       }
@@ -69,33 +67,62 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
   const typingHandler = (e) => {
     setNewMessage(e.target.value);
     if (!socketConnected) return;
-    socket.emit("typing", selectedChat._id);
-    setTimeout(() => socket.emit("stop-typing", selectedChat._id), 3000);
+    socketRef.current?.emit("typing", selectedChat._id);
+    setTimeout(
+      () => socketRef.current?.emit("stop-typing", selectedChat._id),
+      3000,
+    );
   };
 
+  // Owns the socket's entire lifecycle: create it once per logged-in user,
+  // tear it down on unmount/user change. Nothing else creates or destroys it.
   useEffect(() => {
-    socket = io(url);
-    socket.emit("setup", user);
-    socket.on("connected", () => setSocketConnected(true));
-    socket.on("typing", () => setIsTyping(true));
-    socket.on("stop-typing", () => setIsTyping(false));
+    const s = io(url);
+    socketRef.current = s;
+    s.emit("setup", user);
+    s.on("connected", () => setSocketConnected(true));
+    s.on("typing", () => setIsTyping(true));
+    s.on("stop-typing", () => setIsTyping(false));
+
+    return () => {
+      s.disconnect();
+      socketRef.current = null;
+    };
   }, [user]);
 
   useEffect(() => {
     fetchMessages();
-    selectedChatCompare = selectedChat;
+    selectedChatRef.current = selectedChat;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedChat]);
 
+  // Attached once the socket exists; reads current selectedChat/messages via
+  // refs and functional setState so it never needs to be recreated on every
+  // message, avoiding constant off/on churn on the same socket.
   useEffect(() => {
-    socket.on("message received", (newMsg) => {
-      if (!selectedChatCompare || selectedChatCompare._id !== newMsg.chat._id) {
-        if (!notification.includes(newMsg))
-          dispatch(add_notification([newMsg, ...notification]));
+    const s = socketRef.current;
+    if (!s) return;
+
+    const handleMessageReceived = (newMsg) => {
+      const current = selectedChatRef.current;
+      if (!current || current._id !== newMsg.chat._id) {
+        dispatch((_dispatch, getState) => {
+          const { notification: current } = getState().ChatReducer;
+          if (!current.some((n) => n._id === newMsg._id)) {
+            _dispatch(add_notification([newMsg, ...current]));
+          }
+        });
       } else {
-        setMessages([...messages, newMsg]);
+        setMessages((prev) => [...prev, newMsg]);
       }
-    });
-  });
+    };
+
+    s.on("message-received", handleMessageReceived);
+
+    return () => {
+      s.off("message-received", handleMessageReceived);
+    };
+  }, [socketConnected, dispatch]);
 
   const [modalConfig, setModalConfig] = useState({
     show: false,

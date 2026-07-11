@@ -37,7 +37,7 @@ const UpdateGroupChatModal = ({ fetchMessages, fetchAgain, setFetchAgain, closeM
   };
 
   const handleAdd = async (userToAdd) => {
-    if (selectedChat.users.find((u) => u._id === userToAdd._id)) { toast.error("Already in group"); return; }
+    if (selectedChat.users.find((u) => u && u._id === userToAdd._id)) { toast.error("Already in group"); return; }
     if (selectedChat.groupAdmin !== user._id) { toast.error("Only admin can add users"); return; }
     setLoading(true);
     try {

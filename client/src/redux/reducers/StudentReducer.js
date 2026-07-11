@@ -10,7 +10,7 @@ import {
 } from "../constants/actions-types";
 
 const initialState = {
-  night_mode: Boolean(localStorage.getItem("night_mode")),
+  night_mode: localStorage.getItem("night_mode") === "true",
   learningSchedule: undefined,
   checkpointSubmited: undefined,
   studentQuizScore: [],

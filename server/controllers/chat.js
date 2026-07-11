@@ -20,7 +20,7 @@ const getChatUsersInfo = async (chat) => {
   }
   const chatWithUserInfo = {
     ...chat.toObject(),
-    users: usersWithInfo,
+    users: usersWithInfo.filter(Boolean),
   };
   return chatWithUserInfo;
 };
@@ -256,8 +256,11 @@ const searchUser = async (req, res) => {
     "firstName lastName email profileImg"
   );
 
-  const findUser = await [...students, ...instructors].filter(
-    (user) => user.firstName.includes(search) || user.lastName.includes(search)
+  const q = (search || "").toLowerCase();
+  const findUser = [...students, ...instructors].filter(
+    (user) =>
+      (user.firstName || "").toLowerCase().includes(q) ||
+      (user.lastName || "").toLowerCase().includes(q)
   );
 
   res.status(StatusCodes.OK).json(findUser);

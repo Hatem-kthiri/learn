@@ -22,7 +22,7 @@ const getChatUsersInfo = async (chat) => {
   }
   const chatWithUserInfo = {
     ...chat,
-    users: usersWithInfo,
+    users: usersWithInfo.filter(Boolean),
   };
   return chatWithUserInfo;
 };

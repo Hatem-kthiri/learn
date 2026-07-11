@@ -61,6 +61,11 @@ const getChat = async (req, res) => {
   if (!userId) {
     return res.send("No User Exists!");
   }
+  if (!userConnected) {
+    return res
+      .status(StatusCodes.BAD_REQUEST)
+      .json({ message: "userConnected is required to identify the requester" });
+  }
 
   let chat = await Chat.findOne({
     isGroupChat: false,

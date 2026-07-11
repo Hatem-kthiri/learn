@@ -2,12 +2,12 @@ import React, { useEffect, useRef, useState } from "react";
 import { toast } from "react-toastify";
 import { url } from "../../utils";
 import ClipLoader from "react-spinners/ClipLoader";
-import io from "socket.io-client";
 import { useDispatch, useSelector } from "react-redux";
 import { add_notification } from "../../redux/actions/ChatsActions";
 import axios from "axios";
 import UpdateGroupChatModal from "./UpdateGroupChatModal";
 import { modal_config } from "../../redux/actions/ChatsActions";
+import { useSocket } from "../../context/SocketContext";
 
 const getSender = (loggedUser, users) =>
   users?.find((u) => u && u._id !== loggedUser?._id);
@@ -17,13 +17,12 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
   const { user } = useSelector((state) => state.LoginReducer);
   const { selectedChat } = useSelector((state) => state.ChatReducer);
   const dispatch = useDispatch();
+  const { socketRef, socketConnected } = useSocket();
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(false);
   const [newMessage, setNewMessage] = useState("");
-  const [socketConnected, setSocketConnected] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
   const messagesEndRef = useRef(null);
-  const socketRef = useRef(null);
   const selectedChatRef = useRef(null);
 
   useEffect(() => {
@@ -74,21 +73,20 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
     );
   };
 
-  // Owns the socket's entire lifecycle: create it once per logged-in user,
-  // tear it down on unmount/user change. Nothing else creates or destroys it.
   useEffect(() => {
-    const s = io(url);
-    socketRef.current = s;
-    s.emit("setup", user);
-    s.on("connected", () => setSocketConnected(true));
-    s.on("typing", () => setIsTyping(true));
-    s.on("stop-typing", () => setIsTyping(false));
+    const s = socketRef.current;
+    if (!s) return;
+
+    const onTyping = () => setIsTyping(true);
+    const onStopTyping = () => setIsTyping(false);
+    s.on("typing", onTyping);
+    s.on("stop-typing", onStopTyping);
 
     return () => {
-      s.disconnect();
-      socketRef.current = null;
+      s.off("typing", onTyping);
+      s.off("stop-typing", onStopTyping);
     };
-  }, [user]);
+  }, [socketConnected, socketRef]);
 
   useEffect(() => {
     fetchMessages();
@@ -96,9 +94,9 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedChat]);
 
-  // Attached once the socket exists; reads current selectedChat/messages via
-  // refs and functional setState so it never needs to be recreated on every
-  // message, avoiding constant off/on churn on the same socket.
+  // Attached once the shared socket is connected; reads current
+  // selectedChat via a ref and uses functional setState so it never needs
+  // to be recreated on every message.
   useEffect(() => {
     const s = socketRef.current;
     if (!s) return;
@@ -107,9 +105,9 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
       const current = selectedChatRef.current;
       if (!current || current._id !== newMsg.chat._id) {
         dispatch((_dispatch, getState) => {
-          const { notification: current } = getState().ChatReducer;
-          if (!current.some((n) => n._id === newMsg._id)) {
-            _dispatch(add_notification([newMsg, ...current]));
+          const { notification } = getState().ChatReducer;
+          if (!notification.some((n) => n._id === newMsg._id)) {
+            _dispatch(add_notification([newMsg, ...notification]));
           }
         });
       } else {
@@ -122,7 +120,8 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
     return () => {
       s.off("message-received", handleMessageReceived);
     };
-  }, [socketConnected, dispatch]);
+  }, [socketConnected, dispatch, socketRef]);
+
 
   const [modalConfig, setModalConfig] = useState({
     show: false,

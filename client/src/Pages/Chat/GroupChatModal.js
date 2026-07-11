@@ -36,7 +36,7 @@ const GroupChatModal = ({ closeModal, user }) => {
   const handleSubmit = async () => {
     if (!groupChatName || selectedUsers.length < 2) { toast.error("Need a name and at least 2 users"); return; }
     try {
-      const { data } = await axios.post(`${url}/api/v1/chat/createGroup`, { name: groupChatName, users: JSON.stringify(selectedUsers.map((u) => u._id)) });
+      const { data } = await axios.post(`${url}/api/v1/chat/createGroup`, { name: groupChatName, users: JSON.stringify(selectedUsers.map((u) => u._id)), userConnected: user._id });
       dispatch(add_Chat([...chats, data]));
       toast.success("Group created!");
       closeModal();

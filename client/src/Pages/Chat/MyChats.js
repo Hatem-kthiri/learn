@@ -6,10 +6,12 @@ import { useDispatch, useSelector } from "react-redux";
 import {
   add_selectedChat,
   add_Chat,
+  add_notification,
   modal_config,
 } from "../../redux/actions/ChatsActions";
 import axios from "axios";
 import GroupChatModal from "./GroupChatModal";
+import { useSocket } from "../../context/SocketContext";
 
 const getSender = (loggedUser, users) =>
   users?.find((u) => u && u._id !== loggedUser?._id);
@@ -28,9 +30,12 @@ const MyChats = ({ fetchAgain }) => {
   const [searchResult, setSearchResult] = useState([]);
   const [loading, setLoading] = useState(false);
   const [chatWait, setChatWait] = useState(false);
-  const { chats, selectedChat } = useSelector((state) => state.ChatReducer);
+  const { chats, selectedChat, notification } = useSelector(
+    (state) => state.ChatReducer,
+  );
   const { user, userLoading } = useSelector((state) => state.LoginReducer);
   const dispatch = useDispatch();
+  const { socketRef, socketConnected } = useSocket();
 
   const fetchChats = async () => {
     try {
@@ -46,6 +51,33 @@ const MyChats = ({ fetchAgain }) => {
   useEffect(() => {
     if (!userLoading) fetchChats();
   }, [fetchAgain, user]);
+
+  // Any message anywhere (not just the open conversation) should move that
+  // chat to the top of the list and refresh its preview/timestamp instantly.
+  useEffect(() => {
+    const s = socketRef.current;
+    if (!s) return;
+
+    const onMessageReceived = () => {
+      fetchChats();
+    };
+    s.on("message-received", onMessageReceived);
+
+    return () => {
+      s.off("message-received", onMessageReceived);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [socketConnected, socketRef]);
+
+  const unreadCountFor = (chatId) =>
+    notification.filter((n) => n.chat?._id === chatId).length;
+
+  const openChat = (chat) => {
+    dispatch(add_selectedChat(chat));
+    if (notification.some((n) => n.chat?._id === chat._id)) {
+      dispatch(add_notification(notification.filter((n) => n.chat?._id !== chat._id)));
+    }
+  };
 
   const handleSearch = async (e) => {
     const q = e.target.value;
@@ -68,7 +100,10 @@ const MyChats = ({ fetchAgain }) => {
   const accessChat = async (userId) => {
     setChatWait(true);
     try {
-      const { data } = await axios.post(`${url}/api/v1/chat`, { userId });
+      const { data } = await axios.post(`${url}/api/v1/chat`, {
+        userId,
+        userConnected: user._id,
+      });
       dispatch(add_selectedChat(data));
       setSearch("");
       setSearchResult([]);
@@ -138,10 +173,11 @@ const MyChats = ({ fetchAgain }) => {
             {chats.map((chat) => {
               const isSelected = selectedChat?._id === chat._id;
               const sender = getSender(user, chat.users);
+              const unread = unreadCountFor(chat._id);
               return (
                 <button
                   key={chat._id}
-                  onClick={() => dispatch(add_selectedChat(chat))}
+                  onClick={() => openChat(chat)}
                   className={`w-full flex items-center gap-3 p-2.5 rounded-xl transition-all text-left mb-0.5 ${isSelected ? "bg-indigo-600" : "hover:bg-slate-50"}`}
                 >
                   <div className="relative flex-shrink-0">
@@ -172,11 +208,18 @@ const MyChats = ({ fetchAgain }) => {
                         {calculateTimeDiff(chat.latestMessage?.updatedAt)}
                       </span>
                     </div>
-                    <p
-                      className={`text-xs truncate mt-0.5 ${isSelected ? "text-indigo-200" : "text-slate-400"}`}
-                    >
-                      {chat.latestMessage?.message || "No messages yet"}
-                    </p>
+                    <div className="flex items-center justify-between gap-2">
+                      <p
+                        className={`text-xs truncate mt-0.5 ${isSelected ? "text-indigo-200" : "text-slate-400"}`}
+                      >
+                        {chat.latestMessage?.message || "No messages yet"}
+                      </p>
+                      {!isSelected && unread > 0 && (
+                        <span className="flex-shrink-0 min-w-[18px] h-[18px] px-1 rounded-full bg-indigo-600 text-white text-[10px] font-bold flex items-center justify-center">
+                          {unread > 9 ? "9+" : unread}
+                        </span>
+                      )}
+                    </div>
                   </div>
                 </button>
               );

@@ -228,7 +228,7 @@ function App() {
         !isRecoveryPassword &&
         !isChat &&
         !isLearnChat &&
-        !isCourse && <Footer />} */}
+        !isCourse && } */}
     </div>
   );
 }

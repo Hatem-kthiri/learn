@@ -253,6 +253,7 @@ const Checkpoint = () => {
           </div>
         </div>
       </div>
+      <Footer />
     </div>
   );
 };

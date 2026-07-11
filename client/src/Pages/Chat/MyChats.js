@@ -123,11 +123,11 @@ const MyChats = ({ fetchAgain }) => {
   };
 
   return (
-    <div className="w-72 flex-shrink-0 bg-white rounded-2xl shadow-sm border border-slate-100 flex flex-col overflow-hidden">
+    <div className="w-72 flex-shrink-0 bg-white rounded-2xl shadow-sm border border-slate-100 flex flex-col overflow-hidden dark:bg-gray-800 dark:border-gray-700">
       {/* Header */}
-      <div className="p-4 border-b border-slate-100">
+      <div className="p-4 border-b border-slate-100 dark:border-gray-700">
         <div className="flex items-center justify-between mb-3">
-          <h2 className="font-bold text-slate-900">Messages</h2>
+          <h2 className="font-bold text-slate-900 dark:text-white">Messages</h2>
           <button
             onClick={() => {
               setModalConfig({ show: true, display: "block" });
@@ -144,11 +144,11 @@ const MyChats = ({ fetchAgain }) => {
             placeholder="Search people..."
             value={search}
             onChange={handleSearch}
-            className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-9 pr-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all"
+            className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-9 pr-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all dark:bg-gray-900 dark:border-gray-600"
           />
-          <i className="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+          <i className="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs dark:text-gray-500"></i>
           {loading && (
-            <i className="fas fa-spinner fa-spin absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+            <i className="fas fa-spinner fa-spin absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs dark:text-gray-500"></i>
           )}
         </div>
       </div>
@@ -157,7 +157,7 @@ const MyChats = ({ fetchAgain }) => {
       <div className="flex-1 overflow-y-auto">
         {search && searchResult.length > 0 ? (
           <div className="p-2">
-            <p className="text-xs font-bold text-slate-400 uppercase tracking-wider px-2 py-1.5">
+            <p className="text-xs font-bold text-slate-400 uppercase tracking-wider px-2 py-1.5 dark:text-gray-500">
               Search Results
             </p>
             {searchResult.map((u) => (
@@ -178,13 +178,13 @@ const MyChats = ({ fetchAgain }) => {
                 <button
                   key={chat._id}
                   onClick={() => openChat(chat)}
-                  className={`w-full flex items-center gap-3 p-2.5 rounded-xl transition-all text-left mb-0.5 ${isSelected ? "bg-indigo-600" : "hover:bg-slate-50"}`}
+                  className={`w-full flex items-center gap-3 p-2.5 rounded-xl transition-all text-left mb-0.5 ${isSelected ? "bg-indigo-600" : "hover:bg-slate-50 dark:hover:bg-gray-700"}`}
                 >
                   <div className="relative flex-shrink-0">
                     <img
                       src={chat.isGroupChat ? null : sender?.profileImg}
                       alt=""
-                      className={`w-10 h-10 rounded-xl object-cover ${!sender?.profileImg ? "bg-indigo-100" : "bg-slate-100"}`}
+                      className={`w-10 h-10 rounded-xl object-cover ${!sender?.profileImg ? "bg-indigo-100 dark:bg-indigo-900" : "bg-slate-100 dark:bg-gray-700"}`}
                     />
                     {chat.isGroupChat && (
                       <div className="w-10 h-10 rounded-xl bg-violet-100 flex items-center justify-center">
@@ -196,21 +196,21 @@ const MyChats = ({ fetchAgain }) => {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between">
                       <p
-                        className={`font-semibold text-sm truncate ${isSelected ? "text-white" : "text-slate-900"}`}
+                        className={`font-semibold text-sm truncate ${isSelected ? "text-white" : "text-slate-900 dark:text-white"}`}
                       >
                         {chat.isGroupChat
                           ? chat.chatName
                           : `${sender?.firstName} ${sender?.lastName}`}
                       </p>
                       <span
-                        className={`text-xs flex-shrink-0 ml-1 ${isSelected ? "text-indigo-200" : "text-slate-400"}`}
+                        className={`text-xs flex-shrink-0 ml-1 ${isSelected ? "text-indigo-200" : "text-slate-400 dark:text-gray-500"}`}
                       >
                         {calculateTimeDiff(chat.latestMessage?.updatedAt)}
                       </span>
                     </div>
                     <div className="flex items-center justify-between gap-2">
                       <p
-                        className={`text-xs truncate mt-0.5 ${isSelected ? "text-indigo-200" : "text-slate-400"}`}
+                        className={`text-xs truncate mt-0.5 ${isSelected ? "text-indigo-200" : "text-slate-400 dark:text-gray-500"}`}
                       >
                         {chat.latestMessage?.message || "No messages yet"}
                       </p>
@@ -226,7 +226,7 @@ const MyChats = ({ fetchAgain }) => {
             })}
           </div>
         ) : (
-          <div className="flex flex-col items-center justify-center h-full py-12 text-slate-400">
+          <div className="flex flex-col items-center justify-center h-full py-12 text-slate-400 dark:text-gray-500">
             <i className="fas fa-comments text-4xl mb-3 opacity-20"></i>
             <p className="text-sm font-medium">
               {search ? "No results found" : "No conversations yet"}

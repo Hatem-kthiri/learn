@@ -10,12 +10,11 @@ const Admin = () => {
   return (
     <div className="min-h-screen bg-slate-50">
       <Header />
-      <div
-        className={`transition-all duration-300 pt-16 ${verticalNav ? "ml-64" : "ml-16"}`}
-      >
+      <div className={`transition-all duration-300 pt-16 ${verticalNav ? "ml-64" : "ml-16"}`}>
         <main className="p-6 min-h-[calc(100vh-4rem)]">
           <Outlet />
         </main>
+        <Footer />
       </div>
     </div>
   );

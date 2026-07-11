@@ -23,8 +23,8 @@ const Quiz = ({
             <i className="fas fa-question-circle text-white"></i>
           </div>
           <div>
-            <p className="font-bold text-slate-900">Quiz preview</p>
-            <p className="text-sm text-slate-500">
+            <p className="font-bold text-slate-900 dark:text-white">Quiz preview</p>
+            <p className="text-sm text-slate-500 dark:text-gray-400">
               {skillsData.questions?.length} questions
             </p>
           </div>
@@ -34,13 +34,13 @@ const Quiz = ({
           {skillsData.questions.map((question, index) => (
             <div
               key={index}
-              className="border border-slate-200 rounded-2xl p-5 bg-white"
+              className="border border-slate-200 rounded-2xl p-5 bg-white dark:border-gray-600 dark:bg-gray-800"
             >
               <div className="flex items-start gap-2 mb-4">
-                <span className="flex-shrink-0 w-7 h-7 bg-slate-100 rounded-lg flex items-center justify-center text-xs font-bold text-slate-500">
+                <span className="flex-shrink-0 w-7 h-7 bg-slate-100 rounded-lg flex items-center justify-center text-xs font-bold text-slate-500 dark:bg-gray-700 dark:text-gray-400">
                   {String(index + 1).padStart(2, "0")}
                 </span>
-                <p className="font-semibold text-slate-900 text-sm pt-0.5">
+                <p className="font-semibold text-slate-900 text-sm pt-0.5 dark:text-white">
                   {question.question}
                 </p>
               </div>
@@ -79,7 +79,7 @@ const Quiz = ({
                       )}
                     </div>
 
-                    <div className="text-sm text-slate-700 flex-1">
+                    <div className="text-sm text-slate-700 flex-1 dark:text-gray-200">
                       {imageLinkRegex.test(choice.text) ? (
                         <img
                           src={choice.text}
@@ -115,15 +115,15 @@ const Quiz = ({
             <i className="fas fa-list-check text-white"></i>
           </div>
           <div>
-            <p className="font-bold text-slate-900">Correct elements preview</p>
-            <p className="text-sm text-slate-500">
+            <p className="font-bold text-slate-900 dark:text-white">Correct elements preview</p>
+            <p className="text-sm text-slate-500 dark:text-gray-400">
               {skillsData.correctElements?.length} elements marked correct
             </p>
           </div>
         </div>
 
-        <div className="border border-slate-200 rounded-2xl p-5 bg-white">
-          <p className="text-xs text-slate-400 mb-4">
+        <div className="border border-slate-200 rounded-2xl p-5 bg-white dark:border-gray-600 dark:bg-gray-800">
+          <p className="text-xs text-slate-400 mb-4 dark:text-gray-500">
             The following elements are marked as correct answers:
           </p>
           <div className="flex flex-wrap gap-2">
@@ -152,19 +152,19 @@ const Quiz = ({
           <i className="fas fa-arrows-up-down text-white"></i>
         </div>
         <div>
-          <p className="font-bold text-slate-900">Reorder solution preview</p>
-          <p className="text-sm text-slate-500">Correct order shown below</p>
+          <p className="font-bold text-slate-900 dark:text-white">Reorder solution preview</p>
+          <p className="text-sm text-slate-500 dark:text-gray-400">Correct order shown below</p>
         </div>
       </div>
 
-      <div className="border border-slate-200 rounded-2xl p-5 bg-white">
-        <p className="text-sm font-semibold text-slate-700 mb-3 flex items-center gap-2">
+      <div className="border border-slate-200 rounded-2xl p-5 bg-white dark:border-gray-600 dark:bg-gray-800">
+        <p className="text-sm font-semibold text-slate-700 mb-3 flex items-center gap-2 dark:text-gray-200">
           <i className="fas fa-trophy text-amber-400"></i>
           Solution
         </p>
 
         {skillsData.questions && (
-          <div className="text-sm text-slate-600 mb-4 p-3 bg-slate-50 rounded-xl border border-slate-100">
+          <div className="text-sm text-slate-600 mb-4 p-3 bg-slate-50 rounded-xl border border-slate-100 dark:text-gray-300 dark:bg-gray-900 dark:border-gray-700">
             {skillsData.questions}
           </div>
         )}

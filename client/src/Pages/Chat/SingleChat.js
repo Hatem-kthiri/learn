@@ -137,9 +137,9 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
 
   if (!selectedChat) {
     return (
-      <div className="flex-1 flex items-center justify-center h-full text-slate-400">
+      <div className="flex-1 flex items-center justify-center h-full text-slate-400 dark:text-gray-500">
         <div className="text-center">
-          <div className="w-20 h-20 bg-slate-100 rounded-3xl flex items-center justify-center mx-auto mb-4">
+          <div className="w-20 h-20 bg-slate-100 rounded-3xl flex items-center justify-center mx-auto mb-4 dark:bg-gray-700">
             <i className="fas fa-comments text-3xl opacity-30"></i>
           </div>
           <p className="font-semibold text-lg">Start a Conversation</p>
@@ -154,7 +154,7 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
   return (
     <div className="flex flex-col h-full">
       {/* Chat header */}
-      <div className="flex items-center gap-3 p-4 border-b border-slate-100 flex-shrink-0">
+      <div className="flex items-center gap-3 p-4 border-b border-slate-100 flex-shrink-0 dark:border-gray-700">
         <div className="relative">
           {selectedChat.isGroupChat ? (
             <div className="w-10 h-10 bg-violet-100 rounded-xl flex items-center justify-center">
@@ -164,13 +164,13 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
             <img
               src={otherUser?.profileImg}
               alt=""
-              className="w-10 h-10 rounded-xl object-cover bg-slate-100"
+              className="w-10 h-10 rounded-xl object-cover bg-slate-100 dark:bg-gray-700"
             />
           )}
           <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-emerald-400 border-2 border-white rounded-full"></span>
         </div>
         <div className="flex-1">
-          <p className="font-bold text-slate-900 text-sm">
+          <p className="font-bold text-slate-900 text-sm dark:text-white">
             {selectedChat.isGroupChat
               ? selectedChat.chatName
               : `${otherUser?.firstName} ${otherUser?.lastName}`}
@@ -187,7 +187,7 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
                 display: "block",
               })
             }
-            className="w-8 h-8 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-500 flex items-center justify-center transition-colors"
+            className="w-8 h-8 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-500 flex items-center justify-center transition-colors dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-gray-400"
           >
             <i className="fas fa-cog text-xs"></i>
           </button>
@@ -212,11 +212,11 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
                   <img
                     src={msg.sender?.profileImg}
                     alt=""
-                    className="w-7 h-7 rounded-xl object-cover bg-slate-100 flex-shrink-0"
+                    className="w-7 h-7 rounded-xl object-cover bg-slate-100 flex-shrink-0 dark:bg-gray-700"
                   />
                 )}
                 <div
-                  className={`max-w-xs lg:max-w-md px-4 py-2.5 rounded-2xl text-sm ${mine ? "bg-indigo-600 text-white rounded-br-sm" : "bg-slate-100 text-slate-900 rounded-bl-sm"}`}
+                  className={`max-w-xs lg:max-w-md px-4 py-2.5 rounded-2xl text-sm ${mine ? "bg-indigo-600 text-white rounded-br-sm" : "bg-slate-100 text-slate-900 rounded-bl-sm dark:bg-gray-700 dark:text-white"}`}
                 >
                   {!mine && (
                     <p className="text-xs font-bold mb-0.5 text-indigo-600">
@@ -225,7 +225,7 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
                   )}
                   <p>{msg.message}</p>
                   <p
-                    className={`text-xs mt-1 ${mine ? "text-indigo-200" : "text-slate-400"}`}
+                    className={`text-xs mt-1 ${mine ? "text-indigo-200" : "text-slate-400 dark:text-gray-500"}`}
                   >
                     {new Date(msg.createdAt).toLocaleTimeString([], {
                       hour: "2-digit",
@@ -241,7 +241,7 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
       </div>
 
       {/* Input */}
-      <div className="p-4 border-t border-slate-100 flex-shrink-0">
+      <div className="p-4 border-t border-slate-100 flex-shrink-0 dark:border-gray-700">
         <div className="flex items-center gap-3">
           <input
             type="text"
@@ -249,7 +249,7 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
             value={newMessage}
             onChange={typingHandler}
             onKeyDown={sendMessage}
-            className="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all"
+            className="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all dark:bg-gray-900 dark:border-gray-600"
           />
           <button
             onClick={() => sendMessage("click")}

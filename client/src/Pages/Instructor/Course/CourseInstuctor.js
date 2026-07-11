@@ -96,20 +96,20 @@ const CourseInstructor = () => {
   };
 
   return (
-    <div className="h-screen flex flex-col bg-slate-50">
+    <div className="h-screen flex flex-col bg-slate-50 dark:bg-gray-900">
       <HeaderI />
       <div className="flex flex-1 overflow-hidden">
         {/* Sidebar */}
         <aside
           className={`${sidebarOpen ? "w-72" : "w-0"} flex-shrink-0 bg-white border-r border-slate-100 flex flex-col overflow-hidden transition-all duration-300`}
         >
-          <div className="px-4 py-3 border-b border-slate-100 flex items-center justify-between flex-shrink-0">
-            <p className="font-bold text-sm truncate text-slate-900">
+          <div className="px-4 py-3 border-b border-slate-100 flex items-center justify-between flex-shrink-0 dark:border-gray-700">
+            <p className="font-bold text-sm truncate text-slate-900 dark:text-white">
               {course?.title}
             </p>
             <button
               onClick={() => setSidebarOpen(false)}
-              className="w-7 h-7 rounded-lg bg-slate-100 flex items-center justify-center text-slate-400 hover:bg-slate-200 transition-colors flex-shrink-0 ml-2"
+              className="w-7 h-7 rounded-lg bg-slate-100 flex items-center justify-center text-slate-400 hover:bg-slate-200 transition-colors flex-shrink-0 ml-2 dark:bg-gray-700 dark:text-gray-500 dark:hover:bg-gray-600"
             >
               <i className="fas fa-times text-xs"></i>
             </button>
@@ -154,17 +154,17 @@ const CourseInstructor = () => {
         {!sidebarOpen && (
           <button
             onClick={() => setSidebarOpen(true)}
-            className="fixed left-0 top-1/2 -translate-y-1/2 z-30 w-8 h-16 bg-white border border-slate-200 rounded-r-xl shadow-sm flex items-center justify-center text-slate-400 hover:text-indigo-500 transition-colors"
+            className="fixed left-0 top-1/2 -translate-y-1/2 z-30 w-8 h-16 bg-white border border-slate-200 rounded-r-xl shadow-sm flex items-center justify-center text-slate-400 hover:text-indigo-500 transition-colors dark:bg-gray-800 dark:border-gray-600 dark:text-gray-500"
           >
             <i className="fas fa-chevron-right text-xs"></i>
           </button>
         )}
 
         {/* Main */}
-        <div className="flex-1 overflow-y-auto bg-slate-50">
+        <div className="flex-1 overflow-y-auto bg-slate-50 dark:bg-gray-900">
           <div className="max-w-4xl mx-auto px-6 py-8">
             {loading ? (
-              <div className="flex items-center justify-center py-24 text-slate-400">
+              <div className="flex items-center justify-center py-24 text-slate-400 dark:text-gray-500">
                 <div className="text-center">
                   <i className="fas fa-spinner fa-spin text-3xl mb-3 block"></i>
                   <p className="text-sm">Loading...</p>
@@ -177,7 +177,7 @@ const CourseInstructor = () => {
                     <i className="fas fa-chalkboard-teacher mr-1.5"></i>Preview
                     Mode
                   </span>
-                  <span className="text-xs text-slate-400">
+                  <span className="text-xs text-slate-400 dark:text-gray-500">
                     {skillsPosition + 1} / {skillsData.length}
                   </span>
                 </div>
@@ -190,18 +190,18 @@ const CourseInstructor = () => {
                   />
                 ) : (
                   <div
-                    className="prose max-w-none text-slate-800 leading-relaxed"
+                    className="prose max-w-none text-slate-800 leading-relaxed dark:text-gray-100"
                     dangerouslySetInnerHTML={{
                       __html: skillsData[skillsPosition]?.content,
                     }}
                   />
                 )}
 
-                <div className="flex items-center justify-between mt-8 pt-6 border-t border-slate-100">
+                <div className="flex items-center justify-between mt-8 pt-6 border-t border-slate-100 dark:border-gray-700">
                   <button
                     onClick={handlePrevious}
                     disabled={isFirstSlideOverall}
-                    className="flex items-center gap-2 bg-white border border-slate-200 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed text-slate-700 font-semibold px-5 py-2.5 rounded-xl text-sm transition-all"
+                    className="flex items-center gap-2 bg-white border border-slate-200 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed text-slate-700 font-semibold px-5 py-2.5 rounded-xl text-sm transition-all dark:bg-gray-800 dark:border-gray-600 dark:hover:bg-gray-700 dark:text-gray-200"
                   >
                     <i className="fas fa-arrow-left text-xs"></i> Previous
                   </button>
@@ -215,7 +215,7 @@ const CourseInstructor = () => {
                 </div>
               </>
             ) : (
-              <div className="text-center py-24 text-slate-400">
+              <div className="text-center py-24 text-slate-400 dark:text-gray-500">
                 <i className="fas fa-file-alt text-5xl mb-4 block opacity-20"></i>
                 <p>No content</p>
               </div>

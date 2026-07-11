@@ -118,13 +118,15 @@ const Meetings = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-slate-50 dark:bg-gray-900">
       <HeaderI />
       <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8">
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-2xl font-bold text-slate-900">Meetings</h1>
-            <p className="text-slate-500 text-sm mt-1">
+            <h1 className="text-2xl font-bold text-slate-900 dark:text-white">
+              Meetings
+            </h1>
+            <p className="text-slate-500 text-sm mt-1 dark:text-gray-400">
               {meetings?.length || 0} scheduled meetings
             </p>
           </div>
@@ -143,20 +145,20 @@ const Meetings = () => {
 
         {/* Add/Edit Form */}
         {showAdd && (
-          <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 mb-6">
-            <h2 className="font-bold text-slate-900 mb-5">
+          <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 mb-6 dark:bg-gray-800 dark:border-gray-700">
+            <h2 className="font-bold text-slate-900 mb-5 dark:text-white">
               {editId ? "Edit Meeting" : "Schedule New Meeting"}
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-5">
               <div>
-                <label className="block text-sm font-semibold text-slate-700 mb-2">
+                <label className="block text-sm font-semibold text-slate-700 mb-2 dark:text-gray-200">
                   Guild
                 </label>
                 <select
                   name="guild"
                   value={meetDetails.guild || ""}
                   onChange={handleChange}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all dark:bg-gray-900 dark:border-gray-600"
                 >
                   <option value="" disabled>
                     Select a guild
@@ -175,7 +177,7 @@ const Meetings = () => {
               </div>
               {fields.map((f) => (
                 <div key={f.name}>
-                  <label className="block text-sm font-semibold text-slate-700 mb-2">
+                  <label className="block text-sm font-semibold text-slate-700 mb-2 dark:text-gray-200">
                     {f.label}
                   </label>
                   <input
@@ -184,7 +186,7 @@ const Meetings = () => {
                     placeholder={f.placeholder}
                     value={meetDetails[f.name] || ""}
                     onChange={handleChange}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all dark:bg-gray-900 dark:border-gray-600"
                   />
                 </div>
               ))}
@@ -195,7 +197,7 @@ const Meetings = () => {
                   setShowAdd(false);
                   setMeetDetails({});
                 }}
-                className="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold py-3 rounded-xl text-sm transition-all"
+                className="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold py-3 rounded-xl text-sm transition-all dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-gray-200"
               >
                 Cancel
               </button>
@@ -215,7 +217,7 @@ const Meetings = () => {
           {meetings?.map?.((meeting, i) => (
             <div
               key={i}
-              className="bg-white rounded-2xl shadow-sm border border-slate-100 p-5"
+              className="bg-white rounded-2xl shadow-sm border border-slate-100 p-5 dark:bg-gray-800 dark:border-gray-700"
             >
               <div className="flex items-start justify-between mb-4">
                 <div className="w-11 h-11 bg-indigo-100 rounded-xl flex items-center justify-center flex-shrink-0">
@@ -224,21 +226,23 @@ const Meetings = () => {
                 <div className="flex items-center gap-1.5">
                   <button
                     onClick={() => handleEdit(meeting)}
-                    className="w-8 h-8 rounded-lg bg-slate-100 hover:bg-indigo-100 text-slate-500 hover:text-indigo-600 flex items-center justify-center transition-colors"
+                    className="w-8 h-8 rounded-lg bg-slate-100 hover:bg-indigo-100 text-slate-500 hover:text-indigo-600 flex items-center justify-center transition-colors dark:bg-gray-700 dark:text-gray-400"
                   >
                     <i className="fas fa-edit text-xs"></i>
                   </button>
                   <button
                     onClick={() => handleDelete(meeting._id)}
-                    className="w-8 h-8 rounded-lg bg-slate-100 hover:bg-red-100 text-slate-500 hover:text-red-500 flex items-center justify-center transition-colors"
+                    className="w-8 h-8 rounded-lg bg-slate-100 hover:bg-red-100 text-slate-500 hover:text-red-500 flex items-center justify-center transition-colors dark:bg-gray-700 dark:text-gray-400"
                   >
                     <i className="fas fa-trash-alt text-xs"></i>
                   </button>
                 </div>
               </div>
-              <h3 className="font-bold text-slate-900 mb-1">{meeting.name}</h3>
+              <h3 className="font-bold text-slate-900 mb-1 dark:text-white">
+                {meeting.name}
+              </h3>
               {meeting.date && (
-                <p className="text-xs text-slate-500 mb-3">
+                <p className="text-xs text-slate-500 mb-3 dark:text-gray-400">
                   <i className="fas fa-calendar-alt mr-1.5"></i>
                   {new Date(meeting.date).toLocaleString()}
                 </p>
@@ -262,7 +266,7 @@ const Meetings = () => {
             </div>
           ))}
           {(!meetings || meetings.length === 0) && !showAdd && (
-            <div className="col-span-2 text-center py-20 text-slate-400">
+            <div className="col-span-2 text-center py-20 text-slate-400 dark:text-gray-500">
               <i className="fas fa-video text-5xl mb-4 block opacity-20"></i>
               <p className="font-semibold text-lg">No meetings scheduled</p>
               <button

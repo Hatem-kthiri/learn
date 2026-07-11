@@ -59,20 +59,20 @@ const UpdateGroupChatModal = ({ fetchMessages, fetchAgain, setFetchAgain, closeM
   };
 
   return (
-    <div className="bg-white rounded-3xl shadow-2xl overflow-hidden">
-      <div className="flex items-center justify-between p-6 border-b border-slate-100">
-        <h3 className="font-bold text-slate-900">Edit Group: {selectedChat?.chatName}</h3>
-        <button onClick={closeModal} className="w-8 h-8 rounded-xl bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-500">
+    <div className="bg-white rounded-3xl shadow-2xl overflow-hidden dark:bg-gray-800">
+      <div className="flex items-center justify-between p-6 border-b border-slate-100 dark:border-gray-700">
+        <h3 className="font-bold text-slate-900 dark:text-white">Edit Group: {selectedChat?.chatName}</h3>
+        <button onClick={closeModal} className="w-8 h-8 rounded-xl bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-500 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-gray-400">
           <i className="fas fa-times text-sm"></i>
         </button>
       </div>
       <div className="p-6 space-y-5">
         {/* Rename */}
         <div>
-          <label className="block text-sm font-semibold text-slate-700 mb-2">Group Name</label>
+          <label className="block text-sm font-semibold text-slate-700 mb-2 dark:text-gray-200">Group Name</label>
           <div className="flex gap-2">
             <input type="text" value={groupChatName} onChange={(e) => setGroupChatName(e.target.value)}
-              className="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all" />
+              className="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all dark:bg-gray-900 dark:border-gray-600" />
             <button onClick={handleRename} className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-4 py-2.5 rounded-xl text-sm transition-all flex items-center gap-1.5">
               {renameLoading ? <ClipLoader color="#fff" size={14} /> : <><i className="fas fa-save text-xs"></i> Save</>}
             </button>
@@ -81,14 +81,14 @@ const UpdateGroupChatModal = ({ fetchMessages, fetchAgain, setFetchAgain, closeM
 
         {/* Search to add */}
         <div>
-          <label className="block text-sm font-semibold text-slate-700 mb-2">Add Member</label>
+          <label className="block text-sm font-semibold text-slate-700 mb-2 dark:text-gray-200">Add Member</label>
           <div className="relative">
             <input type="text" placeholder="Search users..." value={search} onChange={(e) => handleSearch(e.target.value)}
-              className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-9 pr-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all" />
-            <i className="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+              className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-9 pr-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all dark:bg-gray-900 dark:border-gray-600" />
+            <i className="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs dark:text-gray-500"></i>
           </div>
           {searchResult.length > 0 && (
-            <div className="mt-2 max-h-32 overflow-y-auto border border-slate-100 rounded-xl">
+            <div className="mt-2 max-h-32 overflow-y-auto border border-slate-100 rounded-xl dark:border-gray-700">
               {searchResult.map((u) => <UserListItem key={u._id} user={u} handleFunction={() => handleAdd(u)} />)}
             </div>
           )}
@@ -96,13 +96,13 @@ const UpdateGroupChatModal = ({ fetchMessages, fetchAgain, setFetchAgain, closeM
 
         {/* Members list */}
         <div>
-          <p className="text-sm font-semibold text-slate-700 mb-2">Members ({selectedChat?.users?.length})</p>
+          <p className="text-sm font-semibold text-slate-700 mb-2 dark:text-gray-200">Members ({selectedChat?.users?.length})</p>
           <div className="space-y-1 max-h-40 overflow-y-auto">
             {selectedChat?.users?.map((u) => (
-              <div key={u._id} className="flex items-center gap-2 p-2 rounded-xl hover:bg-slate-50">
-                <img src={u.profileImg} alt="" className="w-8 h-8 rounded-xl object-cover bg-slate-100 flex-shrink-0" />
+              <div key={u._id} className="flex items-center gap-2 p-2 rounded-xl hover:bg-slate-50 dark:hover:bg-gray-700">
+                <img src={u.profileImg} alt="" className="w-8 h-8 rounded-xl object-cover bg-slate-100 flex-shrink-0 dark:bg-gray-700" />
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold text-slate-900 truncate">{u.firstName} {u.lastName}</p>
+                  <p className="text-sm font-semibold text-slate-900 truncate dark:text-white">{u.firstName} {u.lastName}</p>
                   {selectedChat.groupAdmin === u._id && <p className="text-xs text-indigo-600 font-medium">Admin</p>}
                 </div>
                 <button onClick={() => handleRemove(u)} className="w-7 h-7 rounded-lg bg-red-50 hover:bg-red-100 text-red-500 flex items-center justify-center transition-colors flex-shrink-0">
@@ -113,7 +113,7 @@ const UpdateGroupChatModal = ({ fetchMessages, fetchAgain, setFetchAgain, closeM
           </div>
         </div>
       </div>
-      <div className="p-6 border-t border-slate-100">
+      <div className="p-6 border-t border-slate-100 dark:border-gray-700">
         <button onClick={() => handleRemove(user)} className="w-full bg-red-50 hover:bg-red-100 text-red-600 font-semibold py-3 rounded-xl text-sm transition-all flex items-center justify-center gap-2">
           <i className="fas fa-sign-out-alt"></i> Leave Group
         </button>

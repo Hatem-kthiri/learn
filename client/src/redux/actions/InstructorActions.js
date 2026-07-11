@@ -219,10 +219,10 @@ export const update_instructor_password =
       .put(`${url}/api/instructor/updatePassword/${user._id}`, newPassword)
       .then(() => {
         successToast("Password Changed Successfully");
-        setLoading(false);
         setTimeout(() => {
           navigate("/dashboard-instructor");
         }, 2000);
       })
-      .catch((err) => errorToast(err.response.data.message));
+      .catch((err) => errorToast(err?.response?.data?.message || "Something went wrong"))
+      .finally(() => setLoading(false));
   };

@@ -44,26 +44,26 @@ const GroupChatModal = ({ closeModal, user }) => {
   };
 
   return (
-    <div className="bg-white rounded-3xl shadow-2xl overflow-hidden">
-      <div className="flex items-center justify-between p-6 border-b border-slate-100">
-        <h3 className="font-bold text-slate-900">New Group Chat</h3>
-        <button onClick={closeModal} className="w-8 h-8 rounded-xl bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-500">
+    <div className="bg-white rounded-3xl shadow-2xl overflow-hidden dark:bg-gray-800">
+      <div className="flex items-center justify-between p-6 border-b border-slate-100 dark:border-gray-700">
+        <h3 className="font-bold text-slate-900 dark:text-white">New Group Chat</h3>
+        <button onClick={closeModal} className="w-8 h-8 rounded-xl bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-500 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-gray-400">
           <i className="fas fa-times text-sm"></i>
         </button>
       </div>
       <div className="p-6 space-y-4">
         <div>
-          <label className="block text-sm font-semibold text-slate-700 mb-2">Group Name</label>
+          <label className="block text-sm font-semibold text-slate-700 mb-2 dark:text-gray-200">Group Name</label>
           <input type="text" placeholder="e.g. Study Group" value={groupChatName} onChange={(e) => setGroupChatName(e.target.value)}
-            className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all" />
+            className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all dark:bg-gray-900 dark:border-gray-600" />
         </div>
 
         <div>
-          <label className="block text-sm font-semibold text-slate-700 mb-2">Add Members</label>
+          <label className="block text-sm font-semibold text-slate-700 mb-2 dark:text-gray-200">Add Members</label>
           <div className="relative">
             <input type="text" placeholder="Search users..." value={search} onChange={(e) => handleSearch(e.target.value)}
-              className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-9 pr-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all" />
-            <i className="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+              className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-9 pr-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all dark:bg-gray-900 dark:border-gray-600" />
+            <i className="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs dark:text-gray-500"></i>
           </div>
         </div>
 
@@ -83,13 +83,13 @@ const GroupChatModal = ({ closeModal, user }) => {
         {loading ? (
           <div className="flex justify-center py-4"><ClipLoader color="#4f46e5" size={24} /></div>
         ) : searchResult.length > 0 ? (
-          <div className="max-h-40 overflow-y-auto border border-slate-100 rounded-xl">
+          <div className="max-h-40 overflow-y-auto border border-slate-100 rounded-xl dark:border-gray-700">
             {searchResult.map((u) => <UserListItem key={u._id} user={u} handleFunction={() => handleGroup(u)} />)}
           </div>
         ) : null}
       </div>
-      <div className="flex gap-3 p-6 border-t border-slate-100">
-        <button onClick={closeModal} className="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold py-3 rounded-xl text-sm transition-all">Cancel</button>
+      <div className="flex gap-3 p-6 border-t border-slate-100 dark:border-gray-700">
+        <button onClick={closeModal} className="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold py-3 rounded-xl text-sm transition-all dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-gray-200">Cancel</button>
         <button onClick={handleSubmit} className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 rounded-xl text-sm transition-all flex items-center justify-center gap-2">
           <i className="fas fa-users"></i> Create Group
         </button>

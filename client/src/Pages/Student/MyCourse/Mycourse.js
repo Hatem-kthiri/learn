@@ -9,15 +9,9 @@ import { get_learning_schedule } from "../../../redux/actions/StudentAction";
 const Mycourse = () => {
   const dispatch = useDispatch();
   const { user, userLoading } = useSelector((state) => state.LoginReducer);
-  const { night_mode, learningSchedule } = useSelector(
-    (state) => state.StudentReducer,
-  );
-  useEffect(() => {
-    dispatch(current());
-  }, []);
-  useEffect(() => {
-    if (!userLoading) dispatch(get_learning_schedule(user));
-  }, [userLoading]);
+  const { night_mode, learningSchedule } = useSelector((state) => state.StudentReducer);
+  useEffect(() => { dispatch(current()); }, []);
+  useEffect(() => { if (!userLoading) dispatch(get_learning_schedule(user)); }, [userLoading]);
 
   // Finds the furthest-unlocked lesson, i.e. where the student actually left
   // off, instead of always sending them back to the very first lesson.
@@ -25,16 +19,11 @@ const Mycourse = () => {
   // first enrolled course, so this only applies to that one (index 0).
   const getResumePoint = () => {
     if (!learningSchedule) return null;
-    let lastOpenSkill = null,
-      chapterId = null;
+    let lastOpenSkill = null, chapterId = null;
     for (let i = learningSchedule.learning.length - 1; i >= 0; i--) {
       const details = learningSchedule.learning[i].details;
       for (let j = details.length - 1; j >= 0; j--) {
-        if (details[j].open) {
-          lastOpenSkill = details[j];
-          chapterId = learningSchedule.learning[i]._id;
-          break;
-        }
+        if (details[j].open) { lastOpenSkill = details[j]; chapterId = learningSchedule.learning[i]._id; break; }
       }
       if (lastOpenSkill) break;
     }
@@ -43,16 +32,12 @@ const Mycourse = () => {
   const resumePoint = getResumePoint();
 
   return (
-    <div
-      className={`min-h-screen flex flex-col ${night_mode ? "bg-gray-900" : "bg-slate-50"}`}
-    >
+    <div className={`min-h-screen flex flex-col ${night_mode ? "bg-gray-900" : "bg-slate-50"}`}>
       <HeaderS />
       <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8">
         <div className="mb-8">
           <h1 className="text-2xl font-bold text-slate-900">My Courses</h1>
-          <p className="text-slate-500 text-sm mt-1">
-            Your enrolled learning paths
-          </p>
+          <p className="text-slate-500 text-sm mt-1">Your enrolled learning paths</p>
         </div>
 
         {!userLoading && user.course?.length > 0 ? (
@@ -65,22 +50,13 @@ const Mycourse = () => {
               const [resumeChapterId, resumeSkillId] =
                 i === 0 && resumePoint
                   ? resumePoint
-                  : [
-                      course?.data?.[0]?._id,
-                      course?.data?.[0]?.superSkills?.[0]?._id,
-                    ];
+                  : [course?.data?.[0]?._id, course?.data?.[0]?.superSkills?.[0]?._id];
               return (
-                <div
-                  key={i}
-                  className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden group hover:shadow-md transition-shadow"
-                >
+
+                <div key={i} className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden group hover:shadow-md transition-shadow">
                   {course?.image ? (
                     <div className="h-44 overflow-hidden">
-                      <img
-                        src={course.image}
-                        alt={course.title}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                      />
+                      <img src={course.image} alt={course.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
                     </div>
                   ) : (
                     <div className="h-44 bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center">
@@ -88,28 +64,17 @@ const Mycourse = () => {
                     </div>
                   )}
                   <div className="p-5">
-                    <h3 className="font-bold text-slate-900 text-lg mb-1">
-                      {course?.title}
-                    </h3>
-                    <p className="text-slate-500 text-sm line-clamp-2 mb-4">
-                      {course?.description}
-                    </p>
+                    <h3 className="font-bold text-slate-900 text-lg mb-1">{course?.title}</h3>
+                    <p className="text-slate-500 text-sm line-clamp-2 mb-4">{course?.description}</p>
 
                     {/* Progress bar */}
                     <div className="mb-4">
                       <div className="flex items-center justify-between mb-1.5">
-                        <span className="text-xs text-slate-500 font-medium">
-                          Progress
-                        </span>
-                        <span className="text-xs font-bold text-indigo-600">
-                          {enrollment.learnProgress || 0}%
-                        </span>
+                        <span className="text-xs text-slate-500 font-medium">Progress</span>
+                        <span className="text-xs font-bold text-indigo-600">{enrollment.learnProgress || 0}%</span>
                       </div>
                       <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
-                        <div
-                          className="h-full bg-indigo-500 rounded-full transition-all duration-500"
-                          style={{ width: `${enrollment.learnProgress || 0}%` }}
-                        ></div>
+                        <div className="h-full bg-indigo-500 rounded-full transition-all duration-500" style={{ width: `${enrollment.learnProgress || 0}%` }}></div>
                       </div>
                     </div>
 
@@ -118,10 +83,8 @@ const Mycourse = () => {
                         Score: {enrollment.learnScore || 0}
                       </span>
                       {resumeSkillId && (
-                        <Link
-                          to={`/course/${resumeChapterId}/${resumeSkillId}`}
-                          className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-4 py-2 rounded-xl text-xs transition-colors"
-                        >
+                        <Link to={`/course/${resumeChapterId}/${resumeSkillId}`}
+                          className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-4 py-2 rounded-xl text-xs transition-colors">
                           <i className="fas fa-play mr-1.5"></i> Continue
                         </Link>
                       )}
@@ -138,6 +101,7 @@ const Mycourse = () => {
           </div>
         )}
       </div>
+      <Footer />
     </div>
   );
 };

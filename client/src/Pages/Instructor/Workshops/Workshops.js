@@ -45,13 +45,15 @@ const Workshops = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-slate-50 dark:bg-gray-900">
       <HeaderI />
       <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8">
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-2xl font-bold text-slate-900">Workshops</h1>
-            <p className="text-slate-500 text-sm mt-1">
+            <h1 className="text-2xl font-bold text-slate-900 dark:text-white">
+              Workshops
+            </h1>
+            <p className="text-slate-500 text-sm mt-1 dark:text-gray-400">
               {workshops?.length || 0} workshops created
             </p>
           </div>
@@ -67,7 +69,7 @@ const Workshops = () => {
           {workshops?.map?.((workshop, i) => (
             <div
               key={i}
-              className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden group hover:shadow-md transition-shadow"
+              className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden group hover:shadow-md transition-shadow dark:bg-gray-800 dark:border-gray-700"
             >
               {workshop.image ? (
                 <div className="h-40 overflow-hidden">
@@ -84,7 +86,9 @@ const Workshops = () => {
               )}
               <div className="p-5">
                 <div className="flex items-center justify-between mb-1">
-                  <h3 className="font-bold text-slate-900">{workshop.name}</h3>
+                  <h3 className="font-bold text-slate-900 dark:text-white">
+                    {workshop.name}
+                  </h3>
                   {workshop.guild && (
                     <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-indigo-100 text-indigo-700">
                       <i className="fas fa-award mr-1 text-xs"></i>
@@ -92,11 +96,11 @@ const Workshops = () => {
                     </span>
                   )}
                 </div>
-                <p className="text-slate-500 text-sm line-clamp-2 mb-4">
+                <p className="text-slate-500 text-sm line-clamp-2 mb-4 dark:text-gray-400">
                   {workshop.description}
                 </p>
                 {workshop.date && (
-                  <p className="text-xs text-slate-400 mb-4">
+                  <p className="text-xs text-slate-400 mb-4 dark:text-gray-500">
                     <i className="fas fa-calendar-alt mr-1.5"></i>
                     {new Date(workshop.date).toLocaleDateString()}
                   </p>
@@ -115,7 +119,7 @@ const Workshops = () => {
                 <div className="flex gap-2">
                   <button
                     onClick={() => handleEditShow(workshop._id)}
-                    className="flex-1 flex items-center justify-center gap-1.5 bg-slate-100 hover:bg-slate-200 text-slate-600 font-semibold py-2 rounded-xl text-xs transition-colors"
+                    className="flex-1 flex items-center justify-center gap-1.5 bg-slate-100 hover:bg-slate-200 text-slate-600 font-semibold py-2 rounded-xl text-xs transition-colors dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-gray-300"
                   >
                     <i className="fas fa-edit"></i> Edit
                   </button>
@@ -130,7 +134,7 @@ const Workshops = () => {
             </div>
           ))}
           {(!workshops || workshops.length === 0) && (
-            <div className="col-span-3 text-center py-20 text-slate-400">
+            <div className="col-span-3 text-center py-20 text-slate-400 dark:text-gray-500">
               <i className="fas fa-tools text-5xl mb-4 block opacity-20"></i>
               <p className="font-semibold text-lg">No workshops yet</p>
               <button

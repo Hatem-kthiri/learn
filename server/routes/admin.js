@@ -177,6 +177,9 @@ router.delete(
 );
 
 // ── Guilds ────────────────────────────────────────────────────────────────
+const sessionController = require("../controllers/sessionController");
+const attendanceController = require("../controllers/attendanceController");
+
 router.post(
   "/createGuild",
   validate(guildValidators.createGuild),
@@ -188,10 +191,55 @@ router.post(
   guildController.addGuild
 );
 router.get("/getGuild", guildController.getGuilds);
+router.get(
+  "/getGuild/:id",
+  validate(guildValidators.guildIdParam),
+  guildController.getGuildById
+);
+router.put(
+  "/updateGuild/:id",
+  validate(guildValidators.updateGuild),
+  guildController.updateGuild
+);
+router.post(
+  "/regenerateSessions/:id",
+  validate(guildValidators.regenerateSessions),
+  guildController.regenerateSessions
+);
+router.get("/generateGuildName", guildController.generateGuildName);
 router.delete(
   "/delete_guild/:id",
   validate(guildValidators.guildIdParam),
   guildController.deleteGuild
 );
+
+// ── Sessions (admin view) ───────────────────────────────────────────────────
+router.get("/guilds/:guildId/sessions", sessionController.getSessionsByGuild);
+router.patch("/sessions/:id/cancel", sessionController.cancelSession);
+
+// ── Attendance reports (admin view) ─────────────────────────────────────────
+router.get("/guilds/:guildId/attendance-report", attendanceController.getInstructorAttendanceReport);
+router.get("/guilds/:guildId/attendance-export", attendanceController.exportGuildAttendance);
+
+// ── Certificates (admin) ─────────────────────────────────────────────────────
+const certificateController = require("../controllers/certificateController");
+const templateController = require("../controllers/admin/certificateTemplateController");
+const certUpload = makeUploader("certificate-templates");
+const certUploadFields = certUpload.fields([
+  { name: "logo", maxCount: 1 },
+  { name: "signatureImage", maxCount: 1 },
+  { name: "backgroundImage", maxCount: 1 },
+]);
+
+router.get("/certificates", certificateController.adminList);
+router.post("/certificates/:id/regenerate", certificateController.adminRegenerate);
+
+router.get("/certificate-templates", templateController.list);
+router.get("/certificate-templates/:id", templateController.getById);
+router.post("/certificate-templates", certUploadFields, templateController.create);
+router.put("/certificate-templates/:id", certUploadFields, templateController.update);
+router.patch("/certificate-templates/:id/activate", templateController.activate);
+router.delete("/certificate-templates/:id", templateController.remove);
+router.post("/certificate-templates/preview", certUploadFields, templateController.preview);
 
 module.exports = router;

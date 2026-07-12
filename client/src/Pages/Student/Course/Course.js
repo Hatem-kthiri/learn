@@ -9,6 +9,7 @@ import Quiz from "./Quiz";
 import { scrollToElement, successToast, url } from "../../../utils";
 import SlideDown from "./SlideDown";
 import { get_learning_schedule } from "../../../redux/actions/StudentAction";
+import CertificateButton from "./CertificateButton";
 
 const Course = () => {
   const dispatch = useDispatch();
@@ -144,6 +145,10 @@ const Course = () => {
                 </div>
                 <span className={`text-xs font-semibold flex-shrink-0 ${textSecondary}`}>{user.course[0].learnProgress || 0}%</span>
               </div>
+            )}
+
+            {!userLoading && user.course?.[0] && (
+              <CertificateButton studentId={user._id} courseId={user.course[0].course?._id} dm={dm} />
             )}
 
             {loading ? (

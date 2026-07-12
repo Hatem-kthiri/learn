@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { current } from "../../redux/actions/Actions";
 import { change_night_mode } from "../../redux/actions/StudentAction";
+import { useUnreadMessages } from "../../hooks/useUnreadMessages";
 
 const HeaderS = () => {
   const dispatch = useDispatch();
@@ -10,6 +11,7 @@ const HeaderS = () => {
   const navigate = useNavigate();
   const { user } = useSelector((state) => state.LoginReducer);
   const { night_mode } = useSelector((state) => state.StudentReducer);
+  const unreadTotal = useUnreadMessages(user?._id);
   const [menuOpen, setMenuOpen] = useState(false);
 
   useEffect(() => {
@@ -31,6 +33,7 @@ const HeaderS = () => {
     { to: "/courses", label: "Courses", icon: "fas fa-book-open" },
     { to: "/checkpoint", label: "Checkpoint", icon: "fas fa-flag-checkered" },
     { to: "/workshop-list", label: "Workshops", icon: "fas fa-tools" },
+    { to: "/attendance-history", label: "Attendance", icon: "fas fa-clipboard-list" },
     { to: "/learn-chat", label: "Chat", icon: "fas fa-comments" },
   ];
 
@@ -76,9 +79,14 @@ const HeaderS = () => {
             <Link
               key={l.to}
               to={l.to}
-              className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-sm font-medium transition-all ${isActive(l.to) ? "bg-indigo-600 text-white shadow-sm" : navBase}`}
+              className={`relative flex items-center gap-2 px-3.5 py-2 rounded-xl text-sm font-medium transition-all ${isActive(l.to) ? "bg-indigo-600 text-white shadow-sm" : navBase}`}
             >
               <i className={`${l.icon} text-xs`}></i> {l.label}
+              {l.to === "/learn-chat" && unreadTotal > 0 && (
+                <span className="absolute -top-1 -right-1 min-w-[16px] h-[16px] px-1 rounded-full bg-red-500 text-white text-[9px] font-bold flex items-center justify-center">
+                  {unreadTotal > 9 ? "9+" : unreadTotal}
+                </span>
+              )}
             </Link>
           ))}
         </nav>
@@ -182,9 +190,14 @@ const HeaderS = () => {
               key={l.to}
               to={l.to}
               onClick={() => setMenuOpen(false)}
-              className={`flex items-center gap-2 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all ${isActive(l.to) ? "bg-indigo-600 text-white" : navBase}`}
+              className={`relative flex items-center gap-2 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all ${isActive(l.to) ? "bg-indigo-600 text-white" : navBase}`}
             >
               <i className={`${l.icon} text-xs`}></i> {l.label}
+              {l.to === "/learn-chat" && unreadTotal > 0 && (
+                <span className="ml-auto min-w-[18px] h-[18px] px-1 rounded-full bg-red-500 text-white text-[10px] font-bold flex items-center justify-center">
+                  {unreadTotal > 9 ? "9+" : unreadTotal}
+                </span>
+              )}
             </Link>
           ))}
         </div>

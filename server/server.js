@@ -45,6 +45,8 @@ app.use("/api/user/", require("./routes/user"));
 app.use("/api/instructor/", require("./routes/Instructor"));
 app.use("/api/v1/chat", require("./routes/chat"));
 app.use("/api/v1/message", require("./routes/message"));
+app.use("/api/v1/guild", require("./routes/guild"));
+app.use("/api/v1/certificate", require("./routes/certificate"));
 
 // ─── Database + Start ────────────────────────────────────────────────────────
 const connect = (url) =>

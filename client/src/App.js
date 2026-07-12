@@ -27,6 +27,8 @@ import StudentDetails from "./Pages/Instructor/StudentList/StudentDetails";
 import HeaderS from "./Components/Header/HeaderS";
 import HeaderI from "./Components/Header/HeaderI";
 import Chat from "./Pages/Chat/Chat";
+import AttendanceInstructor from "./Pages/Instructor/Attendance/AttendanceInstructor";
+import AttendanceHistoryStudent from "./Pages/Student/Attendance/AttendanceHistoryStudent";
 function App() {
   const { night_mode } = useSelector((state) => state.StudentReducer);
   const { user } = useSelector((state) => state.LoginReducer);
@@ -219,6 +221,22 @@ function App() {
           element={
             <PrivateRoute user="1">
               <Workshops />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/attendance-instructor"
+          element={
+            <PrivateRoute user="1">
+              <AttendanceInstructor />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/attendance-history"
+          element={
+            <PrivateRoute user="2">
+              <AttendanceHistoryStudent />
             </PrivateRoute>
           }
         />

@@ -9,6 +9,7 @@ import StudentList from "./Pages/Admin/StudentList/StudentList";
 import AddInstructor from "./Pages/Admin/AddInstructor/AddInstructor";
 import InstructorList from "./Pages/Admin/InstructorList/InstructorList";
 import Guild from "./Pages/Admin/Guild/Guild";
+import CertificateTemplates from "./Pages/Admin/CertificateTemplates/CertificateTemplates";
 import EditInstructor from "./Pages/Admin/EditInstructor/EditInstructor";
 import PaymentStudentList from "./Pages/Admin/Payment/PaymentStudentList";
 import PaymentForm from "./Pages/Admin/Payment/addPayment";
@@ -39,6 +40,7 @@ function App() {
           <Route path="students-list" element={<StudentList />} />
           <Route path="instructors-list" element={<InstructorList />} />
           <Route path="guild" element={<Guild />} />
+          <Route path="certificate-templates" element={<CertificateTemplates />} />
           <Route
             path="student-payment/:studentId"
             element={<PaymentStudentList />}

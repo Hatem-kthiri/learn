@@ -20,6 +20,7 @@ const Header = () => {
     { path: "/students-list", icon: "fas fa-users", label: "Students" },
     { path: "/instructors-list", icon: "fas fa-chalkboard-teacher", label: "Instructors" },
     { path: "/guild", icon: "fas fa-award", label: "Guild" },
+    { path: "/certificate-templates", icon: "fas fa-certificate", label: "Certificate Templates" },
   ];
 
   const isActive = (path) => location.pathname === path || location.pathname.startsWith(path + "/");

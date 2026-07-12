@@ -27,6 +27,18 @@ const checkpointSchema = new mongoose.Schema({
     type: Boolean,
     default: true,
   },
+  // Explicit review outcome, separate from `open` (which only tracked
+  // submitted-vs-not). Needed so certificate eligibility can require every
+  // checkpoint be specifically Approved, not just scored.
+  status: {
+    type: String,
+    enum: ["Pending", "Approved", "Rejected"],
+    default: "Pending",
+  },
+  reviewNotes: {
+    type: String,
+    trim: true,
+  },
 });
 
 // Queried as { student } for list, { checkpointId, student } for existence check

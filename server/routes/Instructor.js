@@ -62,10 +62,15 @@ router.get(`/get-checkpoint-details/:id`, validate(v.idParam), async (req, res) 
 router.put(`/submit-checkpoint-score/:id`, validate(v.submitCheckpointScore), async (req, res) => {
   try {
     const { id } = req.params;
-    const { score } = req.body;
+    const { score, status } = req.body;
     const checkpoint = await Checkpoint.findByIdAndUpdate(id, {
       score: score,
       open: false,
+      // Submitting a score has always meant "this checkpoint passed" in
+      // the existing UI, so default to Approved to preserve that behavior;
+      // callers that want to record a rejection-with-score pass status
+      // explicitly instead.
+      status: status || "Approved",
     });
     if (!checkpoint) {
       res.status(404).json({
@@ -76,6 +81,26 @@ router.put(`/submit-checkpoint-score/:id`, validate(v.submitCheckpointScore), as
       message: "close checkpoint successfully",
       data: checkpoint,
     });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "an error occured" });
+  }
+});
+router.put(`/reject-checkpoint/:id`, validate(v.idParam), async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { reviewNotes } = req.body;
+    // Reopened (open: true) so the student can see it needs resubmission,
+    // rather than leaving it in a dead "closed but rejected" state.
+    const checkpoint = await Checkpoint.findByIdAndUpdate(
+      id,
+      { status: "Rejected", open: true, reviewNotes: reviewNotes || "" },
+      { new: true },
+    );
+    if (!checkpoint) {
+      return res.status(404).json({ message: "checkpoint Not Found" });
+    }
+    res.status(200).json({ message: "checkpoint rejected", data: checkpoint });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "an error occured" });

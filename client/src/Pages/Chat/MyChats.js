@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { url } from "../../utils/index";
 import { toast } from "react-toastify";
 import UserListItem from "./UserList";
@@ -6,7 +6,6 @@ import { useDispatch, useSelector } from "react-redux";
 import {
   add_selectedChat,
   add_Chat,
-  add_notification,
   modal_config,
 } from "../../redux/actions/ChatsActions";
 import axios from "axios";
@@ -25,17 +24,43 @@ const calculateTimeDiff = (date) => {
   return `${Math.floor(diff / 1440)}d`;
 };
 
+// Short two-tone beep, synthesized with the Web Audio API so no external
+// asset is needed and the sound-toggle works instantly.
+const playNotificationSound = () => {
+  try {
+    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+    const ctx = new AudioCtx();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.frequency.value = 880;
+    gain.gain.setValueAtTime(0.15, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.25);
+    osc.start();
+    osc.stop(ctx.currentTime + 0.25);
+  } catch (e) {
+    // Audio unsupported/blocked — silently skip, never break the chat UI over this.
+  }
+};
+
 const MyChats = ({ fetchAgain }) => {
   const [search, setSearch] = useState("");
   const [searchResult, setSearchResult] = useState([]);
   const [loading, setLoading] = useState(false);
   const [chatWait, setChatWait] = useState(false);
-  const { chats, selectedChat, notification } = useSelector(
-    (state) => state.ChatReducer,
+  const [unreadCounts, setUnreadCounts] = useState({});
+  const [soundEnabled, setSoundEnabled] = useState(
+    localStorage.getItem("chatSoundEnabled") !== "false",
   );
+  const { chats, selectedChat } = useSelector((state) => state.ChatReducer);
   const { user, userLoading } = useSelector((state) => state.LoginReducer);
   const dispatch = useDispatch();
   const { socketRef, socketConnected } = useSocket();
+  const selectedChatRef = useRef(null);
+  useEffect(() => {
+    selectedChatRef.current = selectedChat;
+  }, [selectedChat]);
 
   const fetchChats = async () => {
     try {
@@ -48,18 +73,38 @@ const MyChats = ({ fetchAgain }) => {
     }
   };
 
+  const fetchUnreadCounts = async () => {
+    if (!user?._id) return;
+    try {
+      const { data } = await axios.get(`${url}/api/v1/message/unread/${user._id}`);
+      setUnreadCounts(data.counts || {});
+    } catch (e) {
+      // Non-critical — badges just won't update this cycle.
+    }
+  };
+
   useEffect(() => {
-    if (!userLoading) fetchChats();
+    if (!userLoading) {
+      fetchChats();
+      fetchUnreadCounts();
+    }
   }, [fetchAgain, user]);
 
   // Any message anywhere (not just the open conversation) should move that
-  // chat to the top of the list and refresh its preview/timestamp instantly.
+  // chat to the top of the list, refresh its preview, bump the unread
+  // badge, and optionally play a sound — unless that chat is the one
+  // currently open, since the user is already looking at it.
   useEffect(() => {
     const s = socketRef.current;
     if (!s) return;
 
-    const onMessageReceived = () => {
+    const onMessageReceived = (newMsg) => {
       fetchChats();
+      const isOpen = selectedChatRef.current?._id === newMsg.chat?._id;
+      if (!isOpen) {
+        fetchUnreadCounts();
+        if (soundEnabled) playNotificationSound();
+      }
     };
     s.on("message-received", onMessageReceived);
 
@@ -67,16 +112,29 @@ const MyChats = ({ fetchAgain }) => {
       s.off("message-received", onMessageReceived);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [socketConnected, socketRef]);
+  }, [socketConnected, socketRef, soundEnabled]);
 
-  const unreadCountFor = (chatId) =>
-    notification.filter((n) => n.chat?._id === chatId).length;
+  const unreadCountFor = (chatId) => unreadCounts[chatId] || 0;
+  const totalUnread = Object.values(unreadCounts).reduce((a, b) => a + b, 0);
 
   const openChat = (chat) => {
     dispatch(add_selectedChat(chat));
-    if (notification.some((n) => n.chat?._id === chat._id)) {
-      dispatch(add_notification(notification.filter((n) => n.chat?._id !== chat._id)));
+    if (unreadCounts[chat._id]) {
+      // Optimistic: clear the badge immediately rather than waiting on the
+      // mark-read request, then confirm with the server in the background.
+      setUnreadCounts((prev) => ({ ...prev, [chat._id]: 0 }));
+      axios
+        .patch(`${url}/api/v1/message/mark-read/${chat._id}/${user._id}`)
+        .catch(() => fetchUnreadCounts());
     }
+  };
+
+  const toggleSound = () => {
+    setSoundEnabled((prev) => {
+      const next = !prev;
+      localStorage.setItem("chatSoundEnabled", String(next));
+      return next;
+    });
   };
 
   const handleSearch = async (e) => {
@@ -127,16 +185,32 @@ const MyChats = ({ fetchAgain }) => {
       {/* Header */}
       <div className="p-4 border-b border-slate-100 dark:border-gray-700">
         <div className="flex items-center justify-between mb-3">
-          <h2 className="font-bold text-slate-900 dark:text-white">Messages</h2>
-          <button
-            onClick={() => {
-              setModalConfig({ show: true, display: "block" });
-            }}
-            className="w-8 h-8 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-600 flex items-center justify-center transition-colors"
-            title="New group chat"
-          >
-            <i className="fas fa-users-cog text-xs"></i>
-          </button>
+          <h2 className="font-bold text-slate-900 dark:text-white">
+            Messages
+            {totalUnread > 0 && (
+              <span className="ml-2 text-[10px] font-bold px-2 py-0.5 rounded-full bg-indigo-600 text-white align-middle">
+                {totalUnread > 9 ? "9+" : totalUnread}
+              </span>
+            )}
+          </h2>
+          <div className="flex items-center gap-1.5">
+            <button
+              onClick={toggleSound}
+              className="w-8 h-8 rounded-xl bg-slate-50 hover:bg-slate-100 dark:bg-gray-700 dark:hover:bg-gray-600 text-slate-500 dark:text-gray-300 flex items-center justify-center transition-colors"
+              title={soundEnabled ? "Mute message sounds" : "Enable message sounds"}
+            >
+              <i className={`fas ${soundEnabled ? "fa-volume-up" : "fa-volume-mute"} text-xs`}></i>
+            </button>
+            <button
+              onClick={() => {
+                setModalConfig({ show: true, display: "block" });
+              }}
+              className="w-8 h-8 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-600 flex items-center justify-center transition-colors"
+              title="New group chat"
+            >
+              <i className="fas fa-users-cog text-xs"></i>
+            </button>
+          </div>
         </div>
         <div className="relative">
           <input
